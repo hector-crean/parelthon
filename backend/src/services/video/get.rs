@@ -1,7 +1,7 @@
 use crate::AppState;
 
 use axum::{extract::State, response::Json};
-use visage_models::video::{GetVideo, Video};
+use parelthon_models::video::{GetVideo, Video};
 
 pub async fn get_video(
     State(state): State<AppState>,

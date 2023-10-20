@@ -3,7 +3,7 @@
 //     Ok(())
 // }
 
-use visage_desktop_client::{errors, update_video};
+use parelthon_desktop_client::{errors, update_video};
 
 #[tokio::main]
 async fn main() -> errors::Result<()> {

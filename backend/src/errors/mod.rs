@@ -4,7 +4,7 @@ pub mod authentication;
 
 /// ReciteError enumerates all possible errors returned by this library.
 #[derive(thiserror::Error, Debug)]
-pub enum VisageServerError {
+pub enum parelthonServerError {
     #[error(transparent)]
     IoError(#[from] std::io::Error),
     #[error(transparent)]
@@ -29,4 +29,4 @@ pub enum VisageServerError {
     ReqwestError(#[from] reqwest::Error),
 }
 
-pub type Result<T> = color_eyre::eyre::Result<T, VisageServerError>;
+pub type Result<T> = color_eyre::eyre::Result<T, parelthonServerError>;

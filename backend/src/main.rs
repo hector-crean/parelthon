@@ -1,10 +1,10 @@
 use aws_sdk_s3::config::{Credentials, Region};
 use dotenv::dotenv;
+use parelthon_server::services::s3::S3Bucket;
+use parelthon_server::{errors, AppState};
 use sqlx::postgres::PgPoolOptions;
 use std::convert::From;
 use tokio::sync::broadcast;
-use visage_server::services::s3::S3Bucket;
-use visage_server::{errors, AppState};
 
 use std::{
     env,
@@ -75,12 +75,15 @@ async fn main() -> errors::Result<()> {
 mod tests {
     use super::*;
 
-    use visage_models::user::User;
+    use axum::Json;
+    use parelthon_models::user::User;
 
+    use parelthon_models::user::{CreateUser, CreateUserResponse};
+    use parelthon_models::video::{CreateVideo, Video};
+    use parelthon_server::services::s3::S3Bucket;
     use serde_json::json;
     use std::net::SocketAddr;
-    use visage_models::user::{CreateUser, CreateUserResponse};
-    use visage_server::services::s3::S3Bucket;
+    use std::path::PathBuf;
 
     // for `call`
     // for `oneshot` and `ready`
@@ -181,9 +184,44 @@ mod tests {
             .json::<Vec<User>>()
             .await?;
 
-        println!("{:?}", &users);
-
         assert_eq!(1, 1);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn mock_create_video() -> errors::Result<()> {
+        dotenv().ok();
+
+        let (addr, router) = router_instance().await?;
+
+        tokio::spawn(async move {
+            axum::Server::bind(&addr)
+                .serve(router.into_make_service())
+                .await
+                .unwrap();
+        });
+
+        let client = reqwest::Client::new();
+
+        let path = PathBuf::from(
+            r"C:\Users\Hector.C\rust\parelthon\backend\src\test_assets\video\hero-loop.mp4",
+        );
+
+        // Create a `CreateUser` instance
+        let create_video = CreateVideo {
+            title: "test_video".to_string(),
+            description: None,
+            path_buf: path,
+        };
+
+        let resp = client
+            .post(format!("http://{}/v1/api/video", addr))
+            .json(&json!(create_video))
+            .send()
+            .await?
+            .json::<Video>()
+            .await?;
 
         Ok(())
     }

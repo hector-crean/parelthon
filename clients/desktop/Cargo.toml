@@ -1,5 +1,5 @@
 [package]
-name = "visage_desktop_client"
+name = "parelthon_desktop_client"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 # internal
-visage_models = { path = "../../crates/visage_models"}
+parelthon_models = { path = "../../crates/parelthon_models"}
 tokio = { version = "1.25", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

@@ -1,11 +1,11 @@
 pub mod errors;
 
 use errors::BibeDesktopClientError;
-use serde_json::json;
-use visage_models::{
+use parelthon_models::{
     user::{CreateUser, CreateUserResponse},
     video::{CreateVideo, Video},
 };
+use serde_json::json;
 
 const ENDPOINT_ROOT: &str = "127.0.0.1:1690";
 

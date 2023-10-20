@@ -1,0 +1,30 @@
+use std::path::PathBuf;
+
+use uuid::Uuid;
+
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+
+use crate::video_label::VideoLabel;
+
+#[derive(Debug, sqlx::FromRow, Deserialize, Serialize)]
+pub struct Video {
+    pub video_id: Uuid,
+    pub title: String,
+    pub description: Option<String>,
+    pub s3_key: String,
+    pub s3_url: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
+}
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CreateVideo {
+    pub title: String,
+    pub description: Option<String>,
+    pub path_buf: PathBuf,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct GetVideo {
+    pub video_id: Uuid,
+}

@@ -1,5 +1,5 @@
 [package]
-name = "visage_server"
+name = "parelthon_server"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 # internal
-visage_models = { path = "../crates/visage_models"}
+parelthon_models = { path = "../crates/parelthon_models"}
 
 tokio = { version = "1.25", features = ["full"] }
 axum ={version="0.6.20", features=["ws", "headers", "tokio"]}
@@ -67,5 +67,5 @@ tower = { version = "0.4.13", features = ["util"] }
 
 # Defining bin here to make multi stage docker build work
 [[bin]]
-name = "visage_server"
+name = "parelthon_server"
 path = "src/main.rs"

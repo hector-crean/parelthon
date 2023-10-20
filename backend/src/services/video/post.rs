@@ -3,10 +3,12 @@ use axum::{
     extract::State,
     response::{IntoResponse, Json, Response},
 };
+use chrono::{DateTime, NaiveDate, Utc};
 use http::StatusCode;
+use parelthon_models::video::{CreateVideo, Video};
+use sqlx::query_as;
 use tokio::sync::broadcast::error::SendError;
 use uuid::Uuid;
-use visage_models::video::{CreateVideo, Video};
 
 #[derive(thiserror::Error, Debug)]
 pub enum CreateVideoError {
@@ -38,24 +40,32 @@ pub async fn create_video(
 ) -> Result<Json<Video>, CreateVideoError> {
     let mut trans = state.pool.begin().await?;
 
-    let s3_key = Uuid::new_v4();
+    let s3_key = Uuid::new_v4().to_string();
 
     let s3_url = state
         .bucket
         .upload_object(path_buf, format!("{}", &s3_key).as_str())
         .await?;
 
-    let video = sqlx::query_as::<_, Video>(
-            r#"insert into "video"(title, description, s3_key, s3_url) values ($1, $2, $3, $4) returning *"#,
-        )
-        .bind(title)
-        .bind(description)
-        .bind(s3_key)
-        .bind(s3_url)
-        .fetch_one(&mut *trans)
-        .await?;
+    let video_id = Uuid::new_v4();
 
-    tracing::debug!("create bike: {:?}", video);
+    let dt = chrono::offset::Utc::now();
+
+    let video = query_as!(
+        Video,
+        r#"INSERT INTO video (video_id, title, description, s3_key, s3_url, updated_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *"#,
+        video_id,
+        title,
+        description,
+        s3_key,
+        s3_url,
+        dt,
+        dt
+    )
+    .fetch_one(&mut *trans)
+    .await?;
+
+    tracing::debug!("create video: {:?}", video);
 
     // Commit the transaction since both operations succeeded
     trans.commit().await?;

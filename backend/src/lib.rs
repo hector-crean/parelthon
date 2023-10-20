@@ -8,7 +8,7 @@ use axum::{
     Router,
 };
 use http::Method;
-use visage_models::random::Random;
+use parelthon_models::random::Random;
 
 use services::{
     s3::S3Bucket,

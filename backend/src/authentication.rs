@@ -1,5 +1,5 @@
 use crate::{Random, USER_COOKIE_NAME};
-use visage_models::{session_token::SessionToken, user::User};
+use parelthon_models::{session_token::SessionToken, user::User};
 
 use sqlx::{Pool, Postgres};
 

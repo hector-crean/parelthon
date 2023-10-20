@@ -1,5 +1,5 @@
 use crate::{services::DatabaseError, AppState};
-use visage_models::user::User;
+use parelthon_models::user::User;
 
 use axum::{extract::State, response::Json};
 

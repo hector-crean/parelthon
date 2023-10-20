@@ -1,5 +1,5 @@
 use crate::{authentication::new_session, errors::authentication::SignupError, AppState};
-use visage_models::user::{CreateUser, CreateUserResponse};
+use parelthon_models::user::{CreateUser, CreateUserResponse};
 
 use axum::{extract::State, response::Json};
 use pbkdf2::{

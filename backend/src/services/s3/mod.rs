@@ -141,7 +141,7 @@ pub mod tests {
 
         let url = bucket
             .upload_object(
-                "/Users/hectorcrean/projects/visage_server/assets/glb/Eye_AMD_Atrophy.glb",
+                "/Users/hectorcrean/projects/parelthon_server/assets/glb/Eye_AMD_Atrophy.glb",
                 format!("{}.glb", &key).as_str(),
             )
             .await?;

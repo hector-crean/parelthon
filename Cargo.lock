@@ -2113,6 +2113,93 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
+name = "parelthon_desktop_client"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "color-eyre",
+ "dotenv",
+ "geo",
+ "geo-types",
+ "parelthon_models",
+ "rand",
+ "rand_core",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "strum",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
+name = "parelthon_models"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "geo",
+ "geo-types",
+ "rand",
+ "rand_chacha",
+ "rand_core",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "strum",
+ "thiserror",
+ "uuid",
+]
+
+[[package]]
+name = "parelthon_server"
+version = "0.1.0"
+dependencies = [
+ "aws-config",
+ "aws-sdk-s3",
+ "aws-smithy-http 0.56.1",
+ "axum",
+ "axum-macros",
+ "chrono",
+ "color-eyre",
+ "config",
+ "cookie",
+ "csv",
+ "dotenv",
+ "futures",
+ "futures-util",
+ "geo",
+ "geo-types",
+ "http",
+ "hyper",
+ "lazy_static",
+ "miette",
+ "mime",
+ "parelthon_models",
+ "pbkdf2",
+ "rand",
+ "rand_chacha",
+ "rand_core",
+ "regex",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "strum",
+ "thiserror",
+ "tokio",
+ "tokio-tungstenite",
+ "tower",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "uuid",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3548,93 +3635,6 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
-
-[[package]]
-name = "visage_desktop_client"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "color-eyre",
- "dotenv",
- "geo",
- "geo-types",
- "rand",
- "rand_core",
- "reqwest",
- "serde",
- "serde_json",
- "strum",
- "thiserror",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "uuid",
- "visage_models",
-]
-
-[[package]]
-name = "visage_models"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "geo",
- "geo-types",
- "rand",
- "rand_chacha",
- "rand_core",
- "serde",
- "serde_json",
- "sqlx",
- "strum",
- "thiserror",
- "uuid",
-]
-
-[[package]]
-name = "visage_server"
-version = "0.1.0"
-dependencies = [
- "aws-config",
- "aws-sdk-s3",
- "aws-smithy-http 0.56.1",
- "axum",
- "axum-macros",
- "chrono",
- "color-eyre",
- "config",
- "cookie",
- "csv",
- "dotenv",
- "futures",
- "futures-util",
- "geo",
- "geo-types",
- "http",
- "hyper",
- "lazy_static",
- "miette",
- "mime",
- "pbkdf2",
- "rand",
- "rand_chacha",
- "rand_core",
- "regex",
- "reqwest",
- "serde",
- "serde_json",
- "sqlx",
- "strum",
- "thiserror",
- "tokio",
- "tokio-tungstenite",
- "tower",
- "tower-http",
- "tracing",
- "tracing-subscriber",
- "url",
- "uuid",
- "visage_models",
-]
 
 [[package]]
 name = "vsimd"
