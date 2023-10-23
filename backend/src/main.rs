@@ -26,7 +26,9 @@ async fn main() -> errors::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 1690));
+    let port: u16 = 1690;
+
+    let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
     tracing::debug!("listening on {}", addr);
 
@@ -63,10 +65,9 @@ async fn main() -> errors::Result<()> {
         .router()
         .await?;
 
-    axum::Server::bind(&addr)
+    let server = axum::Server::bind(&addr)
         .serve(router.into_make_service_with_connect_info::<SocketAddr>())
-        .await
-        .unwrap();
+        .await?;
 
     Ok(())
 }
@@ -79,7 +80,7 @@ mod tests {
     use parelthon_models::user::User;
 
     use parelthon_models::user::{CreateUser, CreateUserResponse};
-    use parelthon_models::video::{CreateVideo, Video};
+    use parelthon_models::video::{CreateVideoFromFilePath, Video};
     use parelthon_server::services::s3::S3Bucket;
     use serde_json::json;
     use std::net::SocketAddr;
@@ -209,7 +210,7 @@ mod tests {
         );
 
         // Create a `CreateUser` instance
-        let create_video = CreateVideo {
+        let create_video = CreateVideoFromFilePath {
             title: "test_video".to_string(),
             description: None,
             path_buf: path,
@@ -222,6 +223,8 @@ mod tests {
             .await?
             .json::<Video>()
             .await?;
+
+        tracing::debug!("{:?}", resp);
 
         Ok(())
     }

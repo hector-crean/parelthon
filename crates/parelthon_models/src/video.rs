@@ -1,4 +1,6 @@
-use std::path::PathBuf;
+use axum_typed_multipart::{FieldData, TryFromMultipart, TypedMultipart};
+use std::{fs::File, path::PathBuf};
+use tempfile::NamedTempFile;
 
 use uuid::Uuid;
 
@@ -18,7 +20,7 @@ pub struct Video {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CreateVideo {
+pub struct CreateVideoFromFilePath {
     pub title: String,
     pub description: Option<String>,
     pub path_buf: PathBuf,

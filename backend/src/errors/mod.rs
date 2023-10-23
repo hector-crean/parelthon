@@ -4,7 +4,7 @@ pub mod authentication;
 
 /// ReciteError enumerates all possible errors returned by this library.
 #[derive(thiserror::Error, Debug)]
-pub enum parelthonServerError {
+pub enum ParelthonServerError {
     #[error(transparent)]
     IoError(#[from] std::io::Error),
     #[error(transparent)]
@@ -27,6 +27,8 @@ pub enum parelthonServerError {
     JsonReadError(#[from] crate::csv_ops::JsonReadError),
     #[error(transparent)]
     ReqwestError(#[from] reqwest::Error),
+    #[error(transparent)]
+    HyperError(#[from] hyper::Error),
 }
 
-pub type Result<T> = color_eyre::eyre::Result<T, parelthonServerError>;
+pub type Result<T> = color_eyre::eyre::Result<T, ParelthonServerError>;

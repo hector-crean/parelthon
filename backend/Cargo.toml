@@ -7,12 +7,20 @@ edition = "2021"
 
 [dependencies]
 # internal
-parelthon_models = { path = "../crates/parelthon_models"}
+parelthon_models = { path = "../crates/parelthon_models" }
 
 tokio = { version = "1.25", features = ["full"] }
-axum ={version="0.6.20", features=["ws", "headers", "tokio"]}
+axum = { version = "0.6.20", features = [
+    "ws",
+    "headers",
+    "tokio",
+    "multipart",
+] }
 futures = "0.3"
-futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+futures-util = { version = "0.3", default-features = false, features = [
+    "sink",
+    "std",
+] }
 axum-macros = "0.3.7"
 tower-http = { version = "0.4.0", features = ["cors", "trace"] } # added
 http = "0.2.9"
@@ -45,7 +53,7 @@ strum = { version = "0.24.1", features = ["derive"] }
 csv = "1.2.1"
 regex = "1.7.3"
 lazy_static = "1.4"
-geo-types = {version="0.7", features=["serde"]}
+geo-types = { version = "0.7", features = ["serde"] }
 
 mime = "0.3"
 reqwest = { version = "0.11.18", features = ['json'] }
@@ -59,6 +67,9 @@ aws-sdk-s3 = "0.28.0"
 aws-smithy-http = "0.56.0"
 
 tokio-tungstenite = "0.20"
+axum_typed_multipart = "0.10.1"
+tempfile = "3"
+hyper = "0.14.27"
 
 [dev-dependencies]
 hyper = { version = "0.14.17", features = ["full"] }

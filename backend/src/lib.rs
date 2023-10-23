@@ -4,10 +4,11 @@ pub mod errors;
 pub mod services;
 
 use axum::{
+    extract::DefaultBodyLimit,
     routing::{get, post},
     Router,
 };
-use http::Method;
+use http::{header::CONTENT_TYPE, Method};
 use parelthon_models::random::Random;
 
 use services::{
@@ -44,8 +45,16 @@ impl AppState {
 
     pub async fn router(self) -> errors::Result<axum::Router> {
         let trace_layer = TraceLayer::new_for_http()
-            .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
-            .on_response(DefaultOnResponse::new().level(Level::INFO));
+            .make_span_with(
+                DefaultMakeSpan::new()
+                    .level(Level::INFO)
+                    .level(Level::DEBUG),
+            )
+            .on_response(
+                DefaultOnResponse::new()
+                    .level(Level::INFO)
+                    .level(Level::DEBUG),
+            );
 
         sqlx::migrate!("./migrations").run(&self.pool).await?;
 
@@ -53,17 +62,19 @@ impl AppState {
             // allow `GET` and `POST` when accessing the resource
             .allow_methods([Method::GET, Method::POST])
             // allow requests from any origin
-            .allow_origin(Any);
+            .allow_origin(Any)
+            .allow_headers([CONTENT_TYPE]);
 
         let router = Router::new()
-            .layer(cors_layer)
-            .layer(trace_layer)
             .route("/users", post(user::post::create_user).get(get_users))
-            .route("/video", post(video::post::create_video))
+            .route("/video", post(video::post::create_video_multipart))
             .with_state(self);
 
-        let api = Router::new().nest("/:version/api", router);
-
+        let api = Router::new()
+            .nest("/:version/api", router)
+            .layer(DefaultBodyLimit::max(1024 * 1024 * 1024))
+            .layer(CorsLayer::permissive())
+            .layer(trace_layer);
         Ok(api)
     }
 }
