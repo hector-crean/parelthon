@@ -4,7 +4,7 @@ import "@mantine/dropzone/styles.css";
 
 import "./App.css";
 
-import { VideoForm2 } from "./component/VideoForm2";
+import { VideoForm } from "./component/VideoForm";
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -14,7 +14,7 @@ function App() {
   return (
     <MantineProvider theme={theme}>
       <div className="container">
-        <VideoForm2 />
+        <VideoForm />
       </div>
     </MantineProvider>
   );

@@ -1,182 +1,144 @@
-import React, { DragEvent, useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { ZodError, ZodType, z } from "zod";
+import axios, { AxiosResponse } from "axios";
+import { CreateVideoFromFile, Video } from "../models/video";
 
-const Uuid = z.string(); // Assuming Uuid is represented as a string
+import { AspectRatio, Flex, Group, Text, TextInput, rem } from "@mantine/core";
+import { Dropzone } from "@mantine/dropzone";
+import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
 
-const Video = z.object({
-  video_id: Uuid,
-  title: z.string(),
-  description: z.union([z.string(), z.null()]), // Option<String> is represented as string | null
-  s3_key: z.string(),
-  s3_url: z.string(),
-  created_at: z.string(), // Assuming chrono::DateTime<chrono::Utc> is represented as a string
-  updated_at: z.string(), // Assuming chrono::DateTime<chrono::Utc> is represented as a string
-});
+import { useState } from "react";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 
-const CreateVideo = z.object({
-  title: z.string(),
-  description: z.union([z.string(), z.null()]), // Option<String> is represented as string | null
-  file: z.instanceof(File),
-});
+const API_BASE_URL = "http://localhost:1690/v1/api";
 
-const GetVideo = z.object({
-  video_id: Uuid, // Assuming Uuid is represented as a string
-});
-
-const ENDPOINT_BASE = "http://localhost:1690/v1/api";
-
-async function create_video(
-  create_video: z.infer<typeof CreateVideo>
-): Promise<z.infer<typeof Video>> {
-  const requestOptions = {
-    method: "POST",
-    body: JSON.stringify(create_video),
-  };
-
+async function createVideo(
+  createVideoPayload: CreateVideoFromFile
+): Promise<AxiosResponse<Video>> {
   try {
-    const response = await fetch(`${ENDPOINT_BASE}/video`, requestOptions);
-
-    if (!response.ok) {
-      // Handle error here if the response status is not ok (e.g., non-2xx status code)
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const json = await response.json();
-    const parsedVideo = Video.parse(json);
-    return parsedVideo;
+    const response = await axios.post(
+      `${API_BASE_URL}/video`,
+      createVideoPayload,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response;
   } catch (error) {
-    // Handle any network or parsing errors
-    console.error("Error:", error);
-    throw error; // You can handle or rethrow the error as needed
+    throw new Error(`Failed to create video: ${error}`);
   }
 }
 
-// Create a custom hook to validate your form data
-function useZodForm<T>(schema: ZodType<T>) {
-  return (data: unknown): T => {
-    const result = schema.safeParse(data);
-    if (result.success) {
-      return result.data;
-    } else {
-      throw result.error;
+const VideoForm = () => {
+  const methods = useForm<CreateVideoFromFile>();
+
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+
+  const onSubmit = async (formData: CreateVideoFromFile) => {
+    const resp = await createVideo(formData);
+
+    if (resp.data) {
+      setVideoUrl(resp.data.s3_url);
     }
-  };
-}
-
-type FormData = z.infer<typeof CreateVideo>;
-
-const VideoForm: React.FC = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>();
-
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    try {
-      const validData = useZodForm(CreateVideo)(data);
-      // Handle valid data here, e.g., send it to the server
-      await create_video(validData);
-
-      console.log(validData);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        // Handle validation error
-        console.error("Validation error:", error);
-      } else {
-        // Handle other errors
-        console.error("Unknown error:", error);
-      }
-    }
-  };
-
-  const [dragActive, setDragActive] = useState(false);
-  const [files, setFiles] = useState<File[]>([]);
-
-  // Define the event handlers
-  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setDragActive(true);
-  };
-
-  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setDragActive(false);
-  };
-
-  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setDragActive(false);
-
-    // Fetch the files
-    const droppedFiles = Array.from(event.dataTransfer.files);
-    setFiles(droppedFiles);
-
-    // Use FileReader to read file content
-    droppedFiles.forEach((file) => {
-      const reader = new FileReader();
-
-      reader.onloadend = () => {
-        console.log(reader.result);
-      };
-
-      reader.onerror = () => {
-        console.error("There was an issue reading the file.");
-      };
-
-      reader.readAsDataURL(file);
-      return reader;
-    });
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
-        <label htmlFor="title">Title</label>
-        <input type="text" id="title" {...register("title")} />
-        {errors.title && <span>{errors.title.message}</span>}
-      </div>
+    <>
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(onSubmit)}>
+          <Controller
+            control={methods.control}
+            name="file"
+            render={({}) => (
+              <Flex direction={"column"} gap={rem(2)}>
+                <Dropzone
+                  onDrop={(files) => {
+                    const url = URL.createObjectURL(files[0]);
 
-      <div>
-        <label htmlFor="description">Description</label>
-        <textarea id="description" {...register("description")} />
-        {errors.description && <span>{errors.description.message}</span>}
-      </div>
+                    setVideoUrl(url);
 
-      <div>
-        <input
-          type="file"
-          id="input-file-upload"
-          multiple={false}
-          {...register("file")}
-        />
-        <label
-          id="label-file-upload"
-          htmlFor="input-file-upload"
-          className={dragActive ? "drag-active" : ""}
-        >
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "50px",
-              width: "300px",
-              border: "1px dotted",
-              backgroundColor: dragActive ? "lightgray" : "white",
-            }}
-          >
-            Drag and drop some files here
-          </div>
-        </label>
-      </div>
+                    methods.setValue("file", files[0]);
+                  }}
+                  onReject={(files) => console.log("rejected files", files)}
+                  // maxSize={3 * 1024 ** 2}
+                  accept={["video/mp4"]}
+                  multiple={false}
+                >
+                  <Group
+                    justify="center"
+                    gap="xl"
+                    mih={220}
+                    style={{ pointerEvents: "none" }}
+                  >
+                    <Dropzone.Accept>
+                      <IconUpload
+                        style={{
+                          width: rem(52),
+                          height: rem(52),
+                          color: "var(--mantine-color-blue-6)",
+                        }}
+                        stroke={1.5}
+                      />
+                    </Dropzone.Accept>
+                    <Dropzone.Reject>
+                      <IconX
+                        style={{
+                          width: rem(52),
+                          height: rem(52),
+                          color: "var(--mantine-color-red-6)",
+                        }}
+                        stroke={1.5}
+                      />
+                    </Dropzone.Reject>
+                    <Dropzone.Idle>
+                      <IconPhoto
+                        style={{
+                          width: rem(52),
+                          height: rem(52),
+                          color: "var(--mantine-color-dimmed)",
+                        }}
+                        stroke={1.5}
+                      />
+                    </Dropzone.Idle>
 
-      <button type="submit">Submit</button>
-    </form>
+                    <div>
+                      <Text size="xl" inline>
+                        Drag images here or click to select files
+                      </Text>
+                      <Text size="sm" c="dimmed" inline mt={7}>
+                        Attach as many files as you like, each file should not
+                        exceed 5mb
+                      </Text>
+                    </div>
+                  </Group>
+                </Dropzone>
+                <div style={{ width: "100%" }}>
+                  {videoUrl && (
+                    <AspectRatio ratio={16 / 9}>
+                      <video src={videoUrl} />
+                    </AspectRatio>
+                  )}
+                </div>
+                <TextInput
+                  id="title"
+                  variant="filled"
+                  placeholder="title"
+                  {...methods.register("title", { required: true })}
+                />
+                <TextInput
+                  id="description"
+                  variant="filled"
+                  placeholder="description"
+                  {...methods.register("description", { required: true })}
+                />
+
+                <input type="submit" />
+              </Flex>
+            )}
+          />
+        </form>
+      </FormProvider>
+    </>
   );
 };
 
