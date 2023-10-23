@@ -5,6 +5,9 @@ use parelthon_server::{errors, AppState};
 use sqlx::postgres::PgPoolOptions;
 use std::convert::From;
 use tokio::sync::broadcast;
+use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
+use tracing::Level;
+use tracing_subscriber::EnvFilter;
 
 use std::{
     env,
@@ -22,7 +25,15 @@ use rand_core::{RngCore, SeedableRng};
 async fn main() -> errors::Result<()> {
     dotenv().ok();
 
+    let mut env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+        // axum logs rejections from built-in extractors with the `axum::rejection`
+        // target, at `TRACE` level. `axum::rejection=trace` enables showing those events
+        "example_tracing_aka_logging=debug,tower_http=debug,axum::rejection=trace,parelthon_server=debug,error,info".into()
+    });
+
     tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .with(env_filter)
         .with(tracing_subscriber::fmt::layer())
         .init();
 

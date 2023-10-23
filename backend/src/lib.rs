@@ -44,7 +44,7 @@ impl AppState {
     }
 
     pub async fn router(self) -> errors::Result<axum::Router> {
-        let trace_layer = TraceLayer::new_for_http()
+        let http_trace_layer = TraceLayer::new_for_http()
             .make_span_with(
                 DefaultMakeSpan::new()
                     .level(Level::INFO)
@@ -74,7 +74,7 @@ impl AppState {
             .nest("/:version/api", router)
             .layer(DefaultBodyLimit::max(1024 * 1024 * 1024))
             .layer(CorsLayer::permissive())
-            .layer(trace_layer);
+            .layer(http_trace_layer);
         Ok(api)
     }
 }
