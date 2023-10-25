@@ -12,6 +12,10 @@ use http::{header::CONTENT_TYPE, Method};
 use parelthon_models::random::Random;
 
 use services::{
+    comment::{
+        get::{get_comment_by_id, get_comments, get_comments_by_video_id},
+        post::create_comment,
+    },
     s3::S3Bucket,
     user::{self, get::get_users},
     video::{
@@ -75,6 +79,8 @@ impl AppState {
                 post(video::post::create_video_multipart).get(get_videos),
             )
             .route("/videos/:video_id", get(get_video))
+            .route("/videos/:video_id/comments", get(get_comments_by_video_id))
+            .route("/comments", post(create_comment))
             .with_state(self);
 
         let api = Router::new()

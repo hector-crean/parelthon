@@ -4,12 +4,20 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconVideoPlus } from "@tabler/icons-react";
 import styles from "./add-video-card.module.css";
 
-const AddVideoCard = () => {
+interface AddVideoCardProps {
+  refetchFn: Function;
+}
+const AddVideoCard = ({ refetchFn }: AddVideoCardProps) => {
   const [opened, { open, close }] = useDisclosure(false);
+
+  const handleCloseModal = () => {
+    close();
+    refetchFn();
+  };
 
   return (
     <>
-      <Modal opened={opened} onClose={close}>
+      <Modal opened={opened} onClose={handleCloseModal}>
         {/* Modal content */}
         <VideoForm />
       </Modal>

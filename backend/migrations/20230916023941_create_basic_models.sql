@@ -5,15 +5,14 @@ create extension if not exists "uuid-ossp";
 -- User
 create type role as enum ('user', 'superuser', 'admin', 'moderator');
 
-create type point2d as (x real, y real);
-
+-- create type point2d as (x real, y real);
 create table "user" (
     user_id uuid primary key not null default (uuid_generate_v4()),
     username varchar(100) not null unique,
     email text not null,
     password_hash text not null,
     role role default 'user',
-    updated_at timestamp with time zone default now()
+    updated_at timestamp with time zone default now() not null
 );
 
 create table if not exists session (
@@ -36,11 +35,12 @@ create table if not exists video (
 create table if not exists video_comment (
     comment_id uuid primary key not null default (uuid_generate_v4()),
     user_id uuid references "user"(user_id) on delete cascade,
-    video_id uuid REFERENCES video(video_id) on delete cascade,
+    video_id uuid references video(video_id) on delete cascade,
+    updated_at timestamp with time zone default now() not null,
+    created_at timestamp with time zone default now() not null,
+    screen_x real not null,
+    screen_y real not null,
     start_time real not null,
     end_time real,
-    updated_at timestamp with time zone default now(),
-    created_at timestamp with time zone default now(),
-    coordinates point2d NOT NULL,
     comment_text text NOT NULL
 );

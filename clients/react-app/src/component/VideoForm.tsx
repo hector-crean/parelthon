@@ -2,7 +2,6 @@ import { CreateVideoFromFile } from "../models/video";
 
 import {
   AspectRatio,
-  Button,
   Center,
   Flex,
   Group,
@@ -19,7 +18,6 @@ import { useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 
 import { MutationResult } from "@/component/MutationResult";
-import { CustomRichTextEditor } from "@/component/RTE";
 import { Video } from "@/component/Video";
 import { useMutation } from "@tanstack/react-query";
 
@@ -136,7 +134,14 @@ const VideoForm = () => {
                   {...methods.register("title", { required: true })}
                 />
 
-                <Controller
+                <TextInput
+                  id="description"
+                  variant="filled"
+                  placeholder="description"
+                  {...methods.register("description", { required: true })}
+                />
+
+                {/* <Controller
                   control={methods.control}
                   name="description"
                   render={({ field }) => (
@@ -152,7 +157,7 @@ const VideoForm = () => {
                       )}
                     </CustomRichTextEditor>
                   )}
-                />
+                /> */}
 
                 <input type="submit" />
               </Flex>

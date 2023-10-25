@@ -1,7 +1,13 @@
+import { createComment, getCommentsByVideoId } from "@/api/comments";
+import { ResizeContainer } from "@/component/resize-container";
+import { CreateVideoComment } from "@/models/comment";
+import type { Video } from "@/models/video";
 import { AspectRatio } from "@mantine/core";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   ComponentPropsWithoutRef,
+  PointerEvent,
   PointerEventHandler,
   ReactNode,
   useCallback,
@@ -32,12 +38,27 @@ export enum VideoPlayerMode {
 
 type VideoPlayerProps = ComponentPropsWithoutRef<"video"> & {
   mode: VideoPlayerMode;
+  video: Video;
 };
 
-const VideoPlayer = ({ mode, ...videoProps }: VideoPlayerProps) => {
+const VideoPlayer = ({ mode, video, ...videoProps }: VideoPlayerProps) => {
+  const CONTAINER_WIDTH = 300;
+  const [aw, ah] = [16, 9];
+
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const commentsMutation = useMutation({
+    mutationFn: (requestBody: CreateVideoComment) => {
+      return createComment(requestBody);
+    },
+  });
+
+  const commentsQuery = useQuery({
+    queryKey: [`comments:${video.video_id}`],
+    queryFn: () => getCommentsByVideoId(video.video_id),
+  });
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -83,9 +104,33 @@ const VideoPlayer = ({ mode, ...videoProps }: VideoPlayerProps) => {
     }
   };
 
+  const getCurrentTime = () => videoRef.current?.currentTime ?? 0;
+
+  function getPointerPositionWithinElement(
+    element: HTMLElement,
+    event: PointerEvent<HTMLElement>
+  ): { x: number; y: number } {
+    const rect = element.getBoundingClientRect();
+    const left = event.clientX - rect.left;
+    const top = event.clientY - rect.top;
+
+    return { x: (left / rect.width) * 100, y: (top / rect.height) * 100 };
+  }
+
   // handlers
   const handleVideoPointerDown: PointerEventHandler<HTMLVideoElement> = (e) => {
     handlePlayPause();
+
+    if (videoRef.current) {
+      commentsMutation.mutate({
+        comment_text: "Some sort of comment seems appropriate",
+        coordinates: getPointerPositionWithinElement(videoRef.current, e),
+        start_time: getCurrentTime(),
+        video_id: video.video_id,
+      });
+    }
+
+    commentsQuery.refetch();
 
     // video: playing:
     // 1. click on video: -> video pauses, and comment dialog is opened on point you clicked
@@ -109,27 +154,53 @@ const VideoPlayer = ({ mode, ...videoProps }: VideoPlayerProps) => {
   const handleOnVideoPlay = () => {};
 
   return (
-    <AspectRatio
-      ref={videoContainerRef}
-      ratio={16 / 9}
-      mx="auto"
-      className={styles.video_player_wrapper}
-    >
-      <video
-        {...videoProps}
-        ref={videoRef}
-        disablePictureInPicture
-        controlsList="nofullscreen"
-        onPointerDown={handleVideoPointerDown}
-        onTimeUpdate={handleVideoTimeUpdate}
-        onCanPlay={handleReadyToPlay}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
-        onPause={handleOnVideoPause}
-        onPlay={handleOnVideoPlay}
-        muted={isMuted}
-      />
-    </AspectRatio>
+    <ResizeContainer as="div">
+      {({ width, height }) => (
+        <AspectRatio
+          ref={videoContainerRef}
+          maw={`${(width * aw) / ah}px`}
+          mah={`${width / (aw / ah)}px`}
+          className={styles.video_player_wrapper}
+          w={"100%"}
+          pos={"relative"}
+        >
+          <video
+            {...videoProps}
+            ref={videoRef}
+            disablePictureInPicture
+            controlsList="nofullscreen"
+            onPointerDown={handleVideoPointerDown}
+            onTimeUpdate={handleVideoTimeUpdate}
+            onCanPlay={handleReadyToPlay}
+            onPointerMove={handlePointerMove}
+            onPointerLeave={handlePointerLeave}
+            onPause={handleOnVideoPause}
+            onPlay={handleOnVideoPlay}
+            muted={isMuted}
+            src={video.s3_url}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width,
+              height,
+            }}
+          />
+          {commentsQuery.data?.map(({ screen_x, screen_y }) => (
+            <div
+              style={{
+                position: "absolute",
+                left: `${screen_x}%`,
+                top: `${screen_y}%`,
+                backgroundColor: "red",
+                width: "40px",
+                height: "40px",
+              }}
+            ></div>
+          ))}
+        </AspectRatio>
+      )}
+    </ResizeContainer>
   );
 };
 
