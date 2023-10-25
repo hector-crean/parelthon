@@ -14,7 +14,10 @@ use parelthon_models::random::Random;
 use services::{
     s3::S3Bucket,
     user::{self, get::get_users},
-    video::{self},
+    video::{
+        self,
+        get::{get_video, get_videos},
+    },
 };
 use sqlx::{Pool, Postgres};
 use tokio::sync::broadcast;
@@ -67,7 +70,11 @@ impl AppState {
 
         let router = Router::new()
             .route("/users", post(user::post::create_user).get(get_users))
-            .route("/video", post(video::post::create_video_multipart))
+            .route(
+                "/videos",
+                post(video::post::create_video_multipart).get(get_videos),
+            )
+            .route("/videos/:video_id", get(get_video))
             .with_state(self);
 
         let api = Router::new()
