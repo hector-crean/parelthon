@@ -1,21 +1,27 @@
 import { CreateVideoFromFile } from "../models/video";
 
-import { AspectRatio, Button, Center, Flex, Group, Loader, Text, TextInput, rem } from "@mantine/core";
+import {
+  AspectRatio,
+  Button,
+  Center,
+  Flex,
+  Group,
+  Loader,
+  Text,
+  TextInput,
+  rem,
+} from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
 
+import { createVideo } from "@/api/videos";
 import { useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import { createVideo } from "../api/videos";
 
-import { useMutation } from '@tanstack/react-query';
-import { MutationResult } from "./MutationResult";
-import { CustomRichTextEditor } from "./RTE";
-import { Video } from "./Video";
-
-
-
-
+import { MutationResult } from "@/component/MutationResult";
+import { CustomRichTextEditor } from "@/component/RTE";
+import { Video } from "@/component/Video";
+import { useMutation } from "@tanstack/react-query";
 
 const VideoForm = () => {
   const methods = useForm<CreateVideoFromFile>();
@@ -24,11 +30,9 @@ const VideoForm = () => {
 
   const mutation = useMutation({
     mutationFn: (formData: CreateVideoFromFile) => {
-      return createVideo(formData)
+      return createVideo(formData);
     },
-  })
-
-
+  });
 
   return (
     <MutationResult
@@ -37,13 +41,12 @@ const VideoForm = () => {
         <Flex direction={"column"} gap={rem(2)}>
           <Center>
             <Loader color="blue" />
-            {videoUrl && <Video src={videoUrl} />
-            }
+            {videoUrl && <Video src={videoUrl} />}
           </Center>
         </Flex>
       )}
-      renderInitial={
-        () => <Flex direction={'column'}>
+      renderInitial={() => (
+        <Flex direction={"column"}>
           <div style={{ width: "100%" }}>
             {videoUrl && (
               <AspectRatio ratio={16 / 9}>
@@ -51,7 +54,7 @@ const VideoForm = () => {
               </AspectRatio>
             )}
           </div>
-          <FormProvider {...methods} >
+          <FormProvider {...methods}>
             <form
               onSubmit={methods.handleSubmit((values) =>
                 // ✅ reset client state back to undefined
@@ -65,8 +68,6 @@ const VideoForm = () => {
                   render={({ field }) => (
                     <Dropzone
                       onDrop={(files) => {
-
-
                         const url = URL.createObjectURL(files[0]);
 
                         setVideoUrl(url);
@@ -120,13 +121,12 @@ const VideoForm = () => {
                             Drag images here or click to select files
                           </Text>
                           <Text size="sm" c="dimmed" inline mt={7}>
-                            Attach as many files as you like, each file should not
-                            exceed 5mb
+                            Attach as many files as you like, each file should
+                            not exceed 5mb
                           </Text>
                         </div>
                       </Group>
                     </Dropzone>
-
                   )}
                 />
                 <TextInput
@@ -138,33 +138,37 @@ const VideoForm = () => {
 
                 <Controller
                   control={methods.control}
-                  name='description'
-
-                  render={({ field }) => (<CustomRichTextEditor>{({ html }) => <Button onClick={() => methods.setValue('description', html ?? '')}>Post</Button>}</CustomRichTextEditor>)}
+                  name="description"
+                  render={({ field }) => (
+                    <CustomRichTextEditor>
+                      {({ html }) => (
+                        <Button
+                          onClick={() =>
+                            methods.setValue("description", html ?? "")
+                          }
+                        >
+                          Post
+                        </Button>
+                      )}
+                    </CustomRichTextEditor>
+                  )}
                 />
 
                 <input type="submit" />
               </Flex>
-
             </form>
           </FormProvider>
         </Flex>
-      }>
+      )}
+      renderError={() => <div>Error</div>}
+    >
       {({ data }) => (
-        <Flex
-          direction={"column"}
-          gap={rem(2)}
-        >
+        <Flex direction={"column"} gap={rem(2)}>
           <Video src={data.s3_url} />
         </Flex>
-      )
-      }
-    </MutationResult>)
-
-
-
-
-
+      )}
+    </MutationResult>
+  );
 };
 
 export { VideoForm };
