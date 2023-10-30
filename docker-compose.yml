@@ -9,6 +9,9 @@ services:  # Define the services that make up your app
       AWS_REGION: ${AWS_REGION}  # AWS region for S3 access
       S3_BUCKET_NAME: ${S3_BUCKET_NAME}  # S3 bucket name for storing files
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_STORAGE_CLASS: ${S3_STORAGE_CLASS}
+      MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB}
+      ALLOWED_FILE_TYPES: ${ALLOWED_FILE_TYPES}
     build:  # Build configuration if you want to build the image
       context: .  # Build context, i.e., where to find the files needed for the build
       dockerfile: Dockerfile  # The Dockerfile to use for building the image

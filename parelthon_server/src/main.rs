@@ -39,6 +39,9 @@ async fn main() -> errors::Result<()> {
 
     let port: u16 = 1690;
 
+    // 0.0.0.0: This IP address is a way to specify that the socket should bind to all available network interfaces on
+    // the host machine. It's a common choice when you want your service to be reachable from outside networks.
+    // let addr = SocketAddr::from(([0, 0, 0, 0], port));
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
     tracing::debug!("listening on {}", addr);

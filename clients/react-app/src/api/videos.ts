@@ -1,53 +1,70 @@
-import axios from "axios";
 import { API_BASE_URL } from '.';
-import { CreateVideoFromFile, Video } from "../models/video";
-
-
+import { CreateVideoFromFile, Video } from '../models/video';
 
 const createVideo = async (createVideoPayload: CreateVideoFromFile): Promise<Video> => {
+
+    console.log(createVideoPayload)
     try {
-        const { data } = await axios.post(
-            `${API_BASE_URL}/videos`,
-            createVideoPayload,
-            {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            }
-        );
+        const response = await fetch(`${API_BASE_URL}/videos`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(createVideoPayload),
+        });
 
-        return data;
+        if (!response.ok) {
+            // Handle non-successful response (e.g., 4xx or 5xx status codes)
+            throw new Error(`Failed to create video: ${response.statusText}`);
+        }
 
+        const video = await response.json();
+        return video;
     } catch (error) {
-        console.error(`Failed to create video: ${error}`);
-        throw new Error(`Failed to create video: ${error}`);
+        // Handle network errors or other exceptions
+        console.error('Error creating video:', error);
+        throw error;
     }
 };
 
 const getVideos = async (): Promise<Array<Video>> => {
     try {
-        const { data } = await axios.get(`${API_BASE_URL}/videos`);
-        return data
-        throw new Error("Unexpected API response.");
+        const response = await fetch(`${API_BASE_URL}/videos`, {
+            method: 'GET',
+        });
+
+        if (!response.ok) {
+            // Handle non-successful response (e.g., 4xx or 5xx status codes)
+            throw new Error(`Failed to fetch videos: ${response.statusText}`);
+        }
+
+        const videos = await response.json();
+        return videos;
     } catch (error) {
-        console.error(`Failed to fetch videos: ${error}`);
-        throw new Error(`Failed to fetch videos: ${error}`);
+        // Handle network errors or other exceptions
+        console.error('Error fetching videos:', error);
+        throw error;
     }
 };
 
-
-
 const getVideoById = async (videoId: string): Promise<Video> => {
-    const response = await fetch(`${API_BASE_URL}/videos/${videoId}`, {
-        method: 'GET',
-    });
+    try {
+        const response = await fetch(`${API_BASE_URL}/videos/${videoId}`, {
+            method: 'GET',
+        });
 
-    console.log(response)
+        if (!response.ok) {
+            // Handle non-successful response (e.g., 4xx or 5xx status codes)
+            throw new Error(`Failed to fetch video by ID: ${response.statusText}`);
+        }
 
-    return response.json();
+        const video = await response.json();
+        return video;
+    } catch (error) {
+        // Handle network errors or other exceptions
+        console.error('Error fetching video by ID:', error);
+        throw error;
+    }
 };
-
-
-
 
 export { createVideo, getVideoById, getVideos };
