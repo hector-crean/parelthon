@@ -1,5 +1,8 @@
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[derive(
+    Debug, serde::Serialize, serde::Deserialize, sqlx::Type, Clone, PartialEq, sqlx::FromRow,
+)]
+#[sqlx(type_name = "point2d")]
 pub struct Point2D {
-    x: f64,
-    y: f64,
+    pub x: f32,
+    pub y: f32,
 }

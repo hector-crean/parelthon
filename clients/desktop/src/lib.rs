@@ -3,7 +3,7 @@ pub mod errors;
 use errors::BibeDesktopClientError;
 use parelthon_models::{
     user::{CreateUser, CreateUserResponse},
-    video::{CreateVideo, Video},
+    video::{CreateVideoFromFilePath, Video},
 };
 use serde_json::json;
 

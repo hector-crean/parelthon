@@ -49,7 +49,28 @@ impl S3Bucket {
         ))
     }
 
-    pub async fn upload_object<P: AsRef<Path>>(
+    pub async fn upload_object_from_file(
+        &self,
+        file_data: Vec<u8>, // Accept the file data as a Vec<u8> (byte vector)
+        key: &str,
+    ) -> Result<String, S3Error> {
+        let _put_object_output = self
+            .client
+            .put_object()
+            .bucket(&self.bucket_name)
+            .key(key)
+            .body(ByteStream::from(file_data)) // Pass the file data as the body
+            .send()
+            .await?;
+
+        tracing::info!("Object uploaded successfully with key");
+
+        let url = self.url(key)?;
+
+        Ok(url)
+    }
+
+    pub async fn upload_object_from_file_path<P: AsRef<Path>>(
         &self,
         file_path: P,
         key: &str,
@@ -140,13 +161,11 @@ pub mod tests {
         let bucket = bucket_singleton().await?;
 
         let url = bucket
-            .upload_object(
+            .upload_object_from_file_path(
                 "/Users/hectorcrean/projects/parelthon_server/assets/glb/Eye_AMD_Atrophy.glb",
                 format!("{}.glb", &key).as_str(),
             )
             .await?;
-
-        println!("{}", url);
 
         assert_eq!(1, 1);
 
