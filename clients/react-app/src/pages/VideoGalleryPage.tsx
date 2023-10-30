@@ -33,7 +33,12 @@ const VideoGallery = () => {
         <QueryResult queryResult={videosQuery}>
           {({ data }) => {
             return data.map((video) => (
-              <VideoCard key={video.s3_key} src={video.s3_url} {...video} />
+              <VideoCard
+                key={video.s3_key}
+                src={video.s3_url}
+                controls={false}
+                {...video}
+              />
             ));
           }}
         </QueryResult>

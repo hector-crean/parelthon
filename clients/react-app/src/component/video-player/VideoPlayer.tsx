@@ -6,6 +6,7 @@ import { AspectRatio } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
+  ComponentProps,
   ComponentPropsWithoutRef,
   PointerEvent,
   PointerEventHandler,
@@ -42,7 +43,6 @@ type VideoPlayerProps = ComponentPropsWithoutRef<"video"> & {
 };
 
 const VideoPlayer = ({ mode, video, ...videoProps }: VideoPlayerProps) => {
-  const CONTAINER_WIDTH = 300;
   const [aw, ah] = [16, 9];
 
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
@@ -186,17 +186,32 @@ const VideoPlayer = ({ mode, video, ...videoProps }: VideoPlayerProps) => {
               height,
             }}
           />
-          {commentsQuery.data?.map(({ screen_x, screen_y }) => (
-            <div
+
+          {/* <Svg innerWidth={width} innerHeight={height} aspectRatio={[aw, ah]}>
+            {({ xScale, yScale }) => null}
+          </Svg> */}
+
+          {commentsQuery.data?.map(({ screen_x, screen_y }, idx) => (
+            <motion.div
+              key={`pin-${idx}-${screen_x}-${screen_y}`}
               style={{
+                zIndex: 200,
                 position: "absolute",
+                border: "1px solid black",
+                backgroundColor: "transparent",
                 left: `${screen_x}%`,
                 top: `${screen_y}%`,
-                backgroundColor: "red",
-                width: "40px",
-                height: "40px",
+                width: 30,
+                height: 30,
+                // display: "flex",
+                // alignItems: "center",
+                // justifyContent: "center",
               }}
-            ></div>
+            >
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="50" fill="red" />
+              </svg>
+            </motion.div>
           ))}
         </AspectRatio>
       )}
@@ -206,22 +221,20 @@ const VideoPlayer = ({ mode, video, ...videoProps }: VideoPlayerProps) => {
 
 export { VideoPlayer };
 
-interface PinProps {
+type PinProps = {
   x: number;
   y: number;
   timelineY: number;
-}
-const Pin = ({ x, y, timelineY }: PinProps) => {
-  const pinVariants = {
-    onVideo: { x: x, y: y },
-    onTimeline: { x: x, y: timelineY },
-  };
+} & ComponentProps<typeof motion.circle>;
 
+const Pin = ({ x, y, timelineY, ...circleProps }: PinProps) => {
   return (
     <motion.circle
       layout
-      initial="onVideo"
-      variants={pinVariants}
+      x={x}
+      y={y}
+      radius={10}
+      {...circleProps}
     ></motion.circle>
   );
 };
