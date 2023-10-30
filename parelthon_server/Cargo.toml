@@ -8,8 +8,9 @@ edition = "2021"
 [dependencies]
 # internal
 parelthon_models = { path = "../crates/parelthon_models" }
+openssl = { version = "0.10", features = ["vendored"] }
 
-tokio = { version = "1.25", features = ["full"] }
+tokio = { version = "1.33", features = ["full"] }
 axum = { version = "0.6.20", features = [
     "ws",
     "headers",
