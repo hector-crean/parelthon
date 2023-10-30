@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            insert into video_comment(user_id, video_id, comment_text, start_time, end_time, screen_x, screen_y)\n            values ($1, $2, $3, $4, $5, $6, $7)\n            returning *\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "comment_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "video_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "screen_x",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 6,
+        "name": "screen_y",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 7,
+        "name": "start_time",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 8,
+        "name": "end_time",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 9,
+        "name": "comment_text",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Float4",
+        "Float4",
+        "Float4",
+        "Float4"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "285e6ac0969a13b29fda8506351b0bfcf7a1fcc85f94c96d2ff153ee0c59029e"
+}
