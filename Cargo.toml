@@ -1,0 +1,4 @@
+[workspace]
+
+members = ["parelthon_server", "clients/*", "crates/*"]
+exclude = ["clients/react-app"]
