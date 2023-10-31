@@ -15,7 +15,7 @@ const convertToInterval = <D>({ period: [start, end], data }: IntervalData<[numb
   }
 }
 
-const intervalTree = <D>(timespans: Array<IntervalData<[number, number], D>>) => {
+const intervalTreeFn = <D>(timespans: Array<IntervalData<[number, number], D>>) => {
 
   const tree = new IntervalTree<D>();
   for (const { period, data } of timespans) {
@@ -32,5 +32,5 @@ const intervalTree = <D>(timespans: Array<IntervalData<[number, number], D>>) =>
 
 
 export type { IntervalData };
-export { convertToInterval, intervalTree };
+export { convertToInterval, intervalTreeFn };
 

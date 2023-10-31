@@ -1,4 +1,4 @@
-import { getVideoById } from "@/api/videos";
+import { getVideoWithCommentsByVideoId } from "@/api/comments";
 import { QueryResult } from "@/component/QueryResult";
 import {
   VideoPlayer,
@@ -29,20 +29,21 @@ interface VideoEditorPageInnerProps {
 }
 
 const VideoEditorPageInner = ({ videoId }: VideoEditorPageInnerProps) => {
-
-  const videoQuery = useQuery({
+  const getVideoWithCommentsQuery = useQuery({
     queryKey: [`video:${videoId}`],
-    queryFn: () => getVideoById(videoId),
+    queryFn: () => getVideoWithCommentsByVideoId(videoId),
   });
 
   return (
-    <>
-      <QueryResult queryResult={videoQuery}>
-        {({ data }) => (
-          <VideoPlayer videoPayload={data} mode={VideoPlayerMode.Editor} />
-        )}
-      </QueryResult>
-    </>
+    <QueryResult queryResult={getVideoWithCommentsQuery}>
+      {({ data }) => (
+        <VideoPlayer
+          videoPayload={data.video}
+          mode={VideoPlayerMode.Editor}
+          videoComments={data.comments}
+        />
+      )}
+    </QueryResult>
   );
 };
 

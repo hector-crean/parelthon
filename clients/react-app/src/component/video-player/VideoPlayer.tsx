@@ -1,35 +1,35 @@
-import { createComment, getCommentsByVideoId } from "@/api/comments";
+import { createComment } from "@/api/comments";
 import { ResizeContainer } from "@/component/resize-container";
 import { CreateVideoComment, VideoComment } from "@/models/comment";
 import type { Video } from "@/models/video";
 import { AspectRatio } from "@mantine/core";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
-  ComponentProps,
   PointerEvent,
-  PointerEventHandler,
   ReactNode,
+  memo,
   useCallback,
   useRef,
-  useState
+  useState,
 } from "react";
+
+import { throttle } from "lodash";
+import { VideoPin } from "./VideoPin";
 import styles from "./video-player.module.css";
 
-interface VideoPlayerState {
-  isPlaying: boolean;
-  isMuted: boolean;
-  isFullscreen: boolean;
-  isLooping: boolean;
-  subtitlesShowing: boolean;
+function getPointerPositionWithinElement(
+  element: HTMLElement,
+  event: PointerEvent<HTMLElement>
+): { x: number; y: number } {
+  const rect = element.getBoundingClientRect();
+  const left = event.clientX - rect.left;
+  const top = event.clientY - rect.top;
 
-  volume: number;
-  playbackRate: number;
-  elapsedTime: number;
-  cursorTooltipPosition: [number, number];
-  cursorTooltipContent: ReactNode;
+  return { x: (left / rect.width) * 100, y: (top / rect.height) * 100 };
 }
-interface VideoPlayerUpdate { }
+
+///
 
 export enum VideoPlayerMode {
   Viewer,
@@ -39,27 +39,19 @@ export enum VideoPlayerMode {
 type VideoPlayerProps = {
   mode: VideoPlayerMode;
   videoPayload: Video;
+  videoComments: Array<VideoComment>;
 };
 
-const VideoPlayer = ({ videoPayload }: VideoPlayerProps) => {
+const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
+  //vars
   const [aw, ah] = [16, 9];
 
+  //refs
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
-
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  const commentsMutation = useMutation({
-    mutationFn: (requestBody: CreateVideoComment) => {
-      return createComment(requestBody);
-    },
-  });
-
-  const commentsQuery = useQuery({
-    queryKey: [`comments:${videoPayload.video_id}`],
-    queryFn: () => getCommentsByVideoId(videoPayload.video_id),
-  });
-
-  const [comments, setComments] = useState<Array<VideoComment>>([]);
+  //state
+  const [comments, setComments] = useState<Array<VideoComment>>(videoComments);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -69,158 +61,139 @@ const VideoPlayer = ({ videoPayload }: VideoPlayerProps) => {
 
   const [volume, setVolume] = useState(1);
   const [playbackRate, setPlaybackRate] = useState(1);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [cursorTooltipPosition, setTooltipPosition] = useState([0, 0]);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  const [cursorTooltipPosition, setTooltipPosition] = useState({
+    x: 0,
+    y: 0,
+  });
   const [cursorTooltipContent, setCursorTooltipContent] =
     useState<ReactNode>(null);
 
-  const [selectedComments, setSelectedComments] = useState<Array<string>>([]);
+  //queries + mutations
+  const commentsMutation = useMutation({
+    mutationFn: (requestBody: CreateVideoComment) => {
+      return createComment(requestBody);
+    },
+  });
 
-  const pauseVideo = () => {
-    videoRef.current?.pause();
-  };
-  const playVideo = () => {
-    videoRef.current?.play();
-  };
-  // utilites functions
-  const handlePlayPause = () => {
+  const pauseVideo = useCallback(() => {
+    if (!videoRef.current) return;
+    videoRef.current.pause();
+  }, [videoRef]);
+  const playVideo = useCallback(() => {
+    if (!videoRef.current) return;
+    videoRef.current.play();
+  }, [videoRef]);
+
+  const togglePlayPause = useCallback(() => {
+    if (!videoRef.current) return;
     if (isPlaying) {
-      pauseVideo();
+      videoRef.current.pause();
       setIsPlaying(false);
     } else {
-      playVideo();
+      videoRef.current.play();
       setIsPlaying(true);
     }
-  };
+  }, [isPlaying, videoRef]);
 
-  const handleFullScreen = () => {
-    if (!isFullScreen) {
-      if (videoContainerRef.current) {
-        videoContainerRef.current.requestFullscreen();
-        setIsFullScreen(true);
-      }
-    } else {
-      document.exitFullscreen();
-      setIsFullScreen(false);
-    }
-  };
+  const handleVideoClick = useCallback(
+    (e: PointerEvent<HTMLVideoElement>) => {
+      if (!videoRef.current) return;
 
-  const getCurrentTime = () => videoRef.current?.currentTime ?? 0;
-
-  function getPointerPositionWithinElement(
-    element: HTMLElement,
-    event: PointerEvent<HTMLElement>
-  ): { x: number; y: number } {
-    const rect = element.getBoundingClientRect();
-    const left = event.clientX - rect.left;
-    const top = event.clientY - rect.top;
-
-    return { x: (left / rect.width) * 100, y: (top / rect.height) * 100 };
-  }
-
-  // handlers
-  const handleVideoPointerDown: PointerEventHandler<HTMLVideoElement> = (e) => {
-    handlePlayPause();
-
-    if (videoRef.current) {
-      commentsMutation.mutate({
-        comment_text: "Some sort of comment seems appropriate",
-        coordinates: getPointerPositionWithinElement(videoRef.current, e),
-        start_time: getCurrentTime(),
-        video_id: videoPayload.video_id,
-      },
-        {
-          onSuccess: (data) => {
-            // Update local state with the newly created comment
-            setComments((prev) => [...prev, data]);
-
-          },
+      if (isPlaying) {
+        const { x, y } = getPointerPositionWithinElement(videoRef.current, e);
+        const createCommentPayload: CreateVideoComment = {
+          comment_text: "Some sort of comment seems appropriate",
+          coordinates: { x, y },
+          start_time: videoRef.current.currentTime,
+          video_id: videoPayload.video_id,
+        };
+        commentsMutation.mutate(createCommentPayload, {
+          onSuccess: (data) => setComments((prev) => [...prev, data]),
         });
-    }
+      }
+      togglePlayPause();
+    },
+    [isPlaying, commentsMutation]
+  );
 
-    // commentsQuery.refetch();
+  const onVideoTimeUpdate = useCallback(
+    throttle(() => {
+      if (videoRef.current) {
+        setCurrentTime(videoRef.current.currentTime);
+        setDuration(videoRef.current.duration);
+      }
+    }, 500),
+    []
+  );
 
-    // video: playing:
-    // 1. click on video: -> video pauses, and comment dialog is opened on point you clicked
-    // -> typing in dialog, and pressing enter saves the comment
-    // -> clicking away resumes the video, and minmises the comment
-    // 2. click on comment: -> video paused, and comment opened up
-    // video: paused:
-    // clicking anywhere, bar on a comment, resumes the video, and minimises everything opened
-  };
+  const handleReadyToPlay = () => {};
 
-  const handleVideoTimeUpdate = () => { };
+  const handlePointerMove = useCallback(
+    throttle((e: PointerEvent<HTMLVideoElement>) => {
+      if (videoRef.current) {
+        const { x, y } = getPointerPositionWithinElement(videoRef.current, e);
+        setTooltipPosition({ x, y });
+      }
+    }, 10),
+    [videoRef]
+  );
+  const handlePointerLeave = () => {};
 
-  const handleReadyToPlay = () => { };
+  const handleOnVideoPause = useCallback(() => {}, []);
 
-  const handlePointerMove = () => { };
-
-  const handlePointerLeave = () => { };
-
-  const handleOnVideoPause = useCallback(() => { }, []);
-
-  const handleOnVideoPlay = () => { };
+  const handleOnVideoPlay = () => {};
 
   return (
     <ResizeContainer as="div">
       {({ width, height }) => (
-        <AspectRatio
-          ref={videoContainerRef}
-          maw={`${(width * aw) / ah}px`}
-          mah={`${width / (aw / ah)}px`}
-          className={styles.video_player_wrapper}
-          w={"100%"}
-          pos={"relative"}
-        >
-          <video
-            ref={videoRef}
-            disablePictureInPicture
-            controlsList="nofullscreen"
-            onPointerDown={handleVideoPointerDown}
-            onTimeUpdate={handleVideoTimeUpdate}
-            onCanPlay={handleReadyToPlay}
-            onPointerMove={handlePointerMove}
-            onPointerLeave={handlePointerLeave}
-            onPause={handleOnVideoPause}
-            onPlay={handleOnVideoPlay}
-            muted={isMuted}
-            src={videoPayload.s3_url}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width,
-              height,
-            }}
-          />
-
-          {/* <Svg innerWidth={width} innerHeight={height} aspectRatio={[aw, ah]}>
+        <>
+          <AspectRatio
+            ref={videoContainerRef}
+            maw={`${(width * aw) / ah}px`}
+            mah={`${width / (aw / ah)}px`}
+            className={styles.video_player_wrapper}
+            w={"100%"}
+            pos={"relative"}
+          >
+            {/* <Svg innerWidth={width} innerHeight={height} aspectRatio={[aw, ah]}>
             {({ xScale, yScale }) => null}
           </Svg> */}
-
-          {comments.map(({ screen_x, screen_y }, idx) => (
-            <motion.div
-              key={`pin-${idx}-${screen_x}-${screen_y}`}
+            <video
+              className={styles.video}
+              data-cursor={isPlaying ? "video-playing" : "video-paused"}
+              controls
+              ref={videoRef}
+              disablePictureInPicture
+              controlsList="nofullscreen"
+              onClick={handleVideoClick}
+              onTimeUpdate={onVideoTimeUpdate}
+              onCanPlay={handleReadyToPlay}
+              onPointerMove={handlePointerMove}
+              onPointerLeave={handlePointerLeave}
+              onPause={handleOnVideoPause}
+              onPlay={handleOnVideoPlay}
+              muted={isMuted}
+              src={videoPayload.s3_url}
               style={{
-                zIndex: 200,
-                position: "absolute",
-                border: "1px solid black",
-                backgroundColor: "transparent",
-                left: `${screen_x}%`,
-                top: `${screen_y}%`,
-                width: 30,
-                height: 30,
-                // display: "flex",
-                // alignItems: "center",
-                // justifyContent: "center",
+                width,
+                height,
               }}
-            >
-              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="50" fill="red" />
-              </svg>
-            </motion.div>
+            />
+          </AspectRatio>
+          {comments.map((comment) => (
+            <VideoPin
+              key={`${comment.comment_id}`}
+              currentTime={currentTime}
+              comment={comment}
+            />
           ))}
-        </AspectRatio>
+          <CursorTooltip position={cursorTooltipPosition}>
+            {isPlaying ? "click to comment" : "click to resume"}
+          </CursorTooltip>
+        </>
       )}
     </ResizeContainer>
   );
@@ -228,20 +201,30 @@ const VideoPlayer = ({ videoPayload }: VideoPlayerProps) => {
 
 export { VideoPlayer };
 
-type PinProps = {
-  x: number;
-  y: number;
-  timelineY: number;
-} & ComponentProps<typeof motion.circle>;
+interface CursorTooltipProps {
+  position: { x: number; y: number };
+  children: ReactNode;
+}
+const CursorTooltip = memo(({ position, children }: CursorTooltipProps) => {
+  const TOOLTIP_WIDTH_IN_PX = 100;
+  const TOOLTIP_HEIGHT_IN_PX = 50;
 
-const Pin = ({ x, y, timelineY, ...circleProps }: PinProps) => {
+  const sign = position.x > 50 ? "-" : "+";
+
   return (
-    <motion.circle
-      layout
-      x={x}
-      y={y}
-      radius={10}
-      {...circleProps}
-    ></motion.circle>
+    <motion.div
+      className={styles.cursor_tooltip}
+      style={{
+        transform: "translate(-50%, -50%)",
+        width: `${TOOLTIP_WIDTH_IN_PX}px`,
+        height: `${TOOLTIP_HEIGHT_IN_PX}px`,
+        position: "absolute",
+        left: `calc(${position.x}% ${sign} ${TOOLTIP_WIDTH_IN_PX}px)`,
+        top: `calc(${position.y}%)`,
+        pointerEvents: "none",
+      }}
+    >
+      {children}
+    </motion.div>
   );
-};
+});

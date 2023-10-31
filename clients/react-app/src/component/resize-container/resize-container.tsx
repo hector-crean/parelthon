@@ -44,7 +44,7 @@ const ResizeContainer = <T extends ElementType>({
     () =>
       throttle(({ width, height, top, left }: DOMRectReadOnly) => {
         setContainerRect({ width, height, top, left });
-      }, 100), // Throttling to at most once every 100 milliseconds
+      }, 300), // Throttling to at most once every 100 milliseconds
     []
   );
 

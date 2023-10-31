@@ -1,4 +1,5 @@
 import { CreateVideoComment, VideoComment } from "@/models/comment";
+import { Video } from "@/models/video";
 import { API_BASE_URL } from ".";
 
 const createComment = async (requestBody: CreateVideoComment): Promise<VideoComment> => {
@@ -15,8 +16,6 @@ const createComment = async (requestBody: CreateVideoComment): Promise<VideoComm
         body: JSON.stringify(requestBody)
     });
 
-    console.log(response)
-
     return response.json()
 }
 
@@ -29,7 +28,22 @@ const getCommentsByVideoId = async (videoId: string): Promise<Array<VideoComment
     return response.json();
 };
 
+const getVideoWithCommentsByVideoId = async (videoId: string): Promise<{ video: Video, comments: Array<VideoComment> }> => {
+    const commentResp = await fetch(`${API_BASE_URL}/videos/${videoId}/comments`, {
+        method: 'GET',
+    });
+    const videoResp = await fetch(`${API_BASE_URL}/videos/${videoId}`, {
+        method: 'GET',
+    });
 
+    const video = await videoResp.json();
+    const comments = await commentResp.json();
 
-export { getCommentsByVideoId, createComment };
+    return {
+        video: video,
+        comments: comments
+    }
+};
+
+export { getCommentsByVideoId, createComment, getVideoWithCommentsByVideoId };
 

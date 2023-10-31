@@ -20,13 +20,9 @@ function QueryResult<TData>({
 }: Props<TData>): ReactNode {
   if (queryResult.isLoading) {
     return renderLoading();
-  }
-
-  if (queryResult.isError) {
+  } else if (queryResult.isError) {
     return renderError(queryResult.error);
-  }
-
-  if (queryResult.isSuccess && queryResult.data) {
+  } else if (queryResult.isSuccess && queryResult.data) {
     return (
       <>
         {children({
@@ -34,9 +30,9 @@ function QueryResult<TData>({
         })}
       </>
     );
+  } else {
+    return null;
   }
-
-  return null;
 }
 
 export { QueryResult };
