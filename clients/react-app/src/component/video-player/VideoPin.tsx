@@ -1,6 +1,7 @@
 import { VideoComment } from "@/models/comment";
-import { Popover, Text } from "@mantine/core";
+import { Popover } from "@mantine/core";
 import { AnimatePresence, motion } from "framer-motion";
+import { CommentAdder } from "./CommentAdder";
 
 import { useDisclosure } from "@mantine/hooks";
 import styles from "./video-pin.module.css";
@@ -16,13 +17,13 @@ const VideoPin = ({
   comment: { screen_x, screen_y, start_time, end_time, comment_text },
   currentTime,
 }: VideoPinProps) => {
-  const [opened, { close, open }] = useDisclosure(false);
+  const [opened, { close, open, toggle }] = useDisclosure(false);
 
   return (
     <AnimatePresence>
       {true && (
         <Popover
-          width={200}
+          width={"min(60%, 800px)"}
           position="bottom"
           withArrow
           shadow="md"
@@ -30,8 +31,8 @@ const VideoPin = ({
         >
           <Popover.Target>
             <motion.div
-              onHoverStart={open}
-              onHoverEnd={close}
+              onClick={toggle}
+              //   onHoverEnd={close}
               className={styles.video_pin}
               style={{
                 transform: "translate(-50%, -50%)",
@@ -65,8 +66,8 @@ const VideoPin = ({
               </svg>
             </motion.div>
           </Popover.Target>
-          <Popover.Dropdown style={{ pointerEvents: "none" }}>
-            <Text size="sm">{comment_text}</Text>
+          <Popover.Dropdown style={{ pointerEvents: "all" }}>
+            <CommentAdder initialContent={comment_text} />
           </Popover.Dropdown>
         </Popover>
       )}
