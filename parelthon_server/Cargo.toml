@@ -5,10 +5,21 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+
+[features]
+# If compiling on a system without OpenSSL installed, or cross-compiling for a different
+# architecture, enable this feature to compile OpenSSL as part of the build.
+# See https://docs.rs/openssl/#vendored for more.
+static_ssl = ['openssl/vendored']
+
+[dependencies.openssl]
+optional = true
+version = "0.10"
+features = ["vendored"]
+
 [dependencies]
 # internal
 parelthon_models = { path = "../crates/parelthon_models" }
-openssl = { version = "0.10", features = ["vendored"] }
 
 tokio = { version = "1.33", features = ["full"] }
 axum = { version = "0.6.20", features = [
