@@ -1,19 +1,18 @@
 import { createComment, getCommentsByVideoId } from "@/api/comments";
 import { ResizeContainer } from "@/component/resize-container";
-import { CreateVideoComment } from "@/models/comment";
+import { CreateVideoComment, VideoComment } from "@/models/comment";
 import type { Video } from "@/models/video";
 import { AspectRatio } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   ComponentProps,
-  ComponentPropsWithoutRef,
   PointerEvent,
   PointerEventHandler,
   ReactNode,
   useCallback,
   useRef,
-  useState,
+  useState
 } from "react";
 import styles from "./video-player.module.css";
 
@@ -30,19 +29,19 @@ interface VideoPlayerState {
   cursorTooltipPosition: [number, number];
   cursorTooltipContent: ReactNode;
 }
-interface VideoPlayerUpdate {}
+interface VideoPlayerUpdate { }
 
 export enum VideoPlayerMode {
   Viewer,
   Editor,
 }
 
-type VideoPlayerProps = ComponentPropsWithoutRef<"video"> & {
+type VideoPlayerProps = {
   mode: VideoPlayerMode;
-  video: Video;
+  videoPayload: Video;
 };
 
-const VideoPlayer = ({ mode, video, ...videoProps }: VideoPlayerProps) => {
+const VideoPlayer = ({ videoPayload }: VideoPlayerProps) => {
   const [aw, ah] = [16, 9];
 
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
@@ -56,9 +55,11 @@ const VideoPlayer = ({ mode, video, ...videoProps }: VideoPlayerProps) => {
   });
 
   const commentsQuery = useQuery({
-    queryKey: [`comments:${video.video_id}`],
-    queryFn: () => getCommentsByVideoId(video.video_id),
+    queryKey: [`comments:${videoPayload.video_id}`],
+    queryFn: () => getCommentsByVideoId(videoPayload.video_id),
   });
+
+  const [comments, setComments] = useState<Array<VideoComment>>([]);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -126,11 +127,18 @@ const VideoPlayer = ({ mode, video, ...videoProps }: VideoPlayerProps) => {
         comment_text: "Some sort of comment seems appropriate",
         coordinates: getPointerPositionWithinElement(videoRef.current, e),
         start_time: getCurrentTime(),
-        video_id: video.video_id,
-      });
+        video_id: videoPayload.video_id,
+      },
+        {
+          onSuccess: (data) => {
+            // Update local state with the newly created comment
+            setComments((prev) => [...prev, data]);
+
+          },
+        });
     }
 
-    commentsQuery.refetch();
+    // commentsQuery.refetch();
 
     // video: playing:
     // 1. click on video: -> video pauses, and comment dialog is opened on point you clicked
@@ -141,17 +149,17 @@ const VideoPlayer = ({ mode, video, ...videoProps }: VideoPlayerProps) => {
     // clicking anywhere, bar on a comment, resumes the video, and minimises everything opened
   };
 
-  const handleVideoTimeUpdate = () => {};
+  const handleVideoTimeUpdate = () => { };
 
-  const handleReadyToPlay = () => {};
+  const handleReadyToPlay = () => { };
 
-  const handlePointerMove = () => {};
+  const handlePointerMove = () => { };
 
-  const handlePointerLeave = () => {};
+  const handlePointerLeave = () => { };
 
-  const handleOnVideoPause = useCallback(() => {}, []);
+  const handleOnVideoPause = useCallback(() => { }, []);
 
-  const handleOnVideoPlay = () => {};
+  const handleOnVideoPlay = () => { };
 
   return (
     <ResizeContainer as="div">
@@ -165,7 +173,6 @@ const VideoPlayer = ({ mode, video, ...videoProps }: VideoPlayerProps) => {
           pos={"relative"}
         >
           <video
-            {...videoProps}
             ref={videoRef}
             disablePictureInPicture
             controlsList="nofullscreen"
@@ -177,7 +184,7 @@ const VideoPlayer = ({ mode, video, ...videoProps }: VideoPlayerProps) => {
             onPause={handleOnVideoPause}
             onPlay={handleOnVideoPlay}
             muted={isMuted}
-            src={video.s3_url}
+            src={videoPayload.s3_url}
             style={{
               position: "absolute",
               top: 0,
@@ -191,7 +198,7 @@ const VideoPlayer = ({ mode, video, ...videoProps }: VideoPlayerProps) => {
             {({ xScale, yScale }) => null}
           </Svg> */}
 
-          {commentsQuery.data?.map(({ screen_x, screen_y }, idx) => (
+          {comments.map(({ screen_x, screen_y }, idx) => (
             <motion.div
               key={`pin-${idx}-${screen_x}-${screen_y}`}
               style={{

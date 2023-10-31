@@ -5,13 +5,20 @@ const createVideo = async (createVideoPayload: CreateVideoFromFile): Promise<Vid
 
     console.log(createVideoPayload)
     try {
+
+        const formData = new FormData();
+        formData.append('title', createVideoPayload.title);
+        formData.append('description', createVideoPayload.description!);
+        formData.append('file', createVideoPayload.file);
+
+
         const response = await fetch(`${API_BASE_URL}/videos`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(createVideoPayload),
+
+            body: formData
         });
+
+        console.log(response)
 
         if (!response.ok) {
             // Handle non-successful response (e.g., 4xx or 5xx status codes)

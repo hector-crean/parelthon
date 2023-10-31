@@ -29,6 +29,7 @@ interface VideoEditorPageInnerProps {
 }
 
 const VideoEditorPageInner = ({ videoId }: VideoEditorPageInnerProps) => {
+
   const videoQuery = useQuery({
     queryKey: [`video:${videoId}`],
     queryFn: () => getVideoById(videoId),
@@ -38,7 +39,7 @@ const VideoEditorPageInner = ({ videoId }: VideoEditorPageInnerProps) => {
     <>
       <QueryResult queryResult={videoQuery}>
         {({ data }) => (
-          <VideoPlayer video={data} mode={VideoPlayerMode.Editor} />
+          <VideoPlayer videoPayload={data} mode={VideoPlayerMode.Editor} />
         )}
       </QueryResult>
     </>
