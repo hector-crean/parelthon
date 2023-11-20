@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CommentAdder } from "./CommentAdder";
 
 import { useDisclosure } from "@mantine/hooks";
-import styles from "./video-pin.module.css";
+import styles from "./VideoPin.module.css";
 // Control how long should a pin stay on the video, before
 // moving back to the controls.
 const PIN_TIME_ON_VIDEO_SECONDS = 3;

@@ -1,4 +1,4 @@
 [workspace]
+resolver = "2"
 
-members = ["parelthon_server", "clients/*", "crates/*"]
-exclude = ["clients/react-app"]
+members=["crates/*", "parelthon_server"]

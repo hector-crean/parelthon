@@ -3,7 +3,8 @@ import { QueryResult } from "@/component/QueryResult";
 import {
   VideoPlayer,
   VideoPlayerMode,
-} from "@/component/video-player/VideoPlayer";
+} from "@/component/VideoPlayer";
+import { VideoLayout } from "@/layouts/VideoLayout";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import styles from "./video-editor-page.module.css";
@@ -29,6 +30,8 @@ interface VideoEditorPageInnerProps {
 }
 
 const VideoEditorPageInner = ({ videoId }: VideoEditorPageInnerProps) => {
+
+  
   const getVideoWithCommentsQuery = useQuery({
     queryKey: [`video:${videoId}`],
     queryFn: () => getVideoWithCommentsByVideoId(videoId),
@@ -37,11 +40,13 @@ const VideoEditorPageInner = ({ videoId }: VideoEditorPageInnerProps) => {
   return (
     <QueryResult queryResult={getVideoWithCommentsQuery}>
       {({ data }) => (
-        <VideoPlayer
+       <VideoLayout>
+         <VideoPlayer
           videoPayload={data.video}
           mode={VideoPlayerMode.Editor}
           videoComments={data.comments}
         />
+       </VideoLayout>
       )}
     </QueryResult>
   );
