@@ -15,6 +15,13 @@ import { VideoGallery } from "@/pages/VideoGalleryPage";
 
 const theme = createTheme({
   /** Put your mantine theme override here */
+  breakpoints: {
+    xs: "36em",
+    sm: "48em",
+    md: "62em",
+    lg: "75em",
+    xl: "88em",
+  },
 });
 
 const queryClient = new QueryClient();
@@ -28,15 +35,13 @@ const App = () => {
   return (
     <MantineProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-       
-            <Switch>
-              <Route path="/editor/videos" component={VideoGallery} />
-              <Route
-                path="/editor/videos/:video_id"
-                component={VideoEditorPage}
-              ></Route>
-            </Switch>
-        
+        <Switch>
+          <Route path="/editor/videos" component={VideoGallery} />
+          <Route
+            path="/editor/videos/:video_id"
+            component={VideoEditorPage}
+          ></Route>
+        </Switch>
       </QueryClientProvider>
     </MantineProvider>
   );
