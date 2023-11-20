@@ -1,5 +1,4 @@
 pub mod authentication;
-pub mod csv_ops;
 pub mod errors;
 pub mod services;
 

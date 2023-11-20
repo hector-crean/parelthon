@@ -1,7 +1,7 @@
 import { ComponentProps, useState } from "react";
 
 import { motion } from 'framer-motion';
-import styles from './video.module.css';
+import styles from './Video.module.css';
 
 type VideoProps = ComponentProps<typeof motion.video>;
 

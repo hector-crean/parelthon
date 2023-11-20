@@ -24,8 +24,6 @@ pub enum ParelthonServerError {
     #[error(transparent)]
     CsvError(#[from] csv::Error),
     #[error(transparent)]
-    JsonReadError(#[from] crate::csv_ops::JsonReadError),
-    #[error(transparent)]
     ReqwestError(#[from] reqwest::Error),
     #[error(transparent)]
     HyperError(#[from] hyper::Error),

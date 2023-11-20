@@ -2,17 +2,14 @@ import { throttle } from "lodash";
 import {
   ComponentPropsWithoutRef,
   ElementType,
+  ReactNode,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import styles from "./resize-container.module.css";
-import type {
-  ChildFn,
-  PropsWithoutChildren,
-  Rect,
-} from "./resize-container.types";
+import styles from "./ResizeContainer.module.css";
+
 
 type ResizeContainerProps<T extends ElementType> = PropsWithoutChildren<
   ComponentPropsWithoutRef<T>
@@ -79,5 +76,28 @@ const ResizeContainer = <T extends ElementType>({
     </Element>
   );
 };
+
+
+// util types:
+type PropsWithoutChildren<P> = P extends any
+  ? "children" extends keyof P
+    ? Omit<P, "children">
+    : P
+  : P;
+
+type ChildFn = (
+    args: {
+      ref: HTMLElement | null;
+      resize: (state: DOMRectReadOnly) => void;
+    } & Rect
+  ) => ReactNode;
+  
+  interface Rect {
+    width: number;
+    height: number;
+    top: number;
+    left: number;
+  }
+
 
 export { ResizeContainer };

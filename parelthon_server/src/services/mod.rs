@@ -1,5 +1,4 @@
 pub mod comment;
-pub mod open_ai;
 pub mod s3;
 pub mod user;
 pub mod video;

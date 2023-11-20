@@ -1,5 +1,5 @@
 import { createComment } from "@/api/comments";
-import { ResizeContainer } from "@/component/resize-container";
+import { ResizeContainer } from "@/component/ResizeContainer";
 import { CreateVideoComment, VideoComment } from "@/models/comment";
 import type { Video } from "@/models/video";
 import { AspectRatio } from "@mantine/core";
@@ -16,7 +16,7 @@ import {
 
 import { throttle } from "lodash";
 import { VideoPin } from "./VideoPin";
-import styles from "./video-player.module.css";
+import styles from "./VideoPlayer.module.css";
 
 function getPointerPositionWithinElement(
   element: HTMLElement,

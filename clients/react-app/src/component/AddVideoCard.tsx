@@ -2,7 +2,7 @@ import { VideoForm } from "@/component/VideoForm";
 import { Container, Flex, Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconVideoPlus } from "@tabler/icons-react";
-import styles from "./add-video-card.module.css";
+import styles from "./AddVideoCard.module.css";
 
 interface AddVideoCardProps {
   refetchFn: Function;
