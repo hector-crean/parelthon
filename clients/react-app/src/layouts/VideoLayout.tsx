@@ -1,5 +1,6 @@
 "use-client";
 
+import { SlimNavbar } from "@/component/SlimNavbar";
 import { Tabs, tabs } from "@/component/tabs/Tabs";
 import { exitFullscreenIconPath } from "@/icons/ExitFullscreen";
 import { fullscreenIconPath } from "@/icons/Fullscreen";
@@ -122,9 +123,19 @@ interface VideoLayoutProps {
 }
 
 const VideoLayout = ({ children }: VideoLayoutProps) => {
+  const [overviewExpanded, setOverviewExpanded] = useState(false);
   return (
     <div className={styles.layout_grid_wrapper}>
       <div className={styles.layout_grid_inner}>
+        <div
+          className={clsx(
+            styles.grid_item,
+            styles.vertical_slim_navbar_wrapper
+          )}
+        >
+          <SlimNavbar orientation="vertical" />
+        </div>
+
         <div className={clsx(styles.grid_item, styles.video_player_wrapper)}>
           {children}
           <Coverup />
@@ -134,9 +145,24 @@ const VideoLayout = ({ children }: VideoLayoutProps) => {
           <Tabs initialTabs={tabs} />
         </div>
 
-        <div className={clsx(styles.grid_item, styles.overview_wrapper)}>
-          Bottom
-        </div>
+        <motion.div
+          className={clsx(styles.grid_item, styles.overview_wrapper)}
+          data-expanded={overviewExpanded}
+          onPointerDown={() => setOverviewExpanded(!overviewExpanded)}
+          layout
+        >
+          <motion.div
+            className="handle"
+            layout
+            transition={{
+              type: "spring",
+              stiffness: 700,
+              damping: 30,
+            }}
+          >
+            Bottom
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );

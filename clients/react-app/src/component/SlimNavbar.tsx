@@ -12,7 +12,7 @@ import {
   IconUser,
 } from "@tabler/icons-react";
 import { useState } from "react";
-import classes from "./NavbarMinimalColored.module.css";
+import classes from "./SlimNavbar.module.css";
 
 interface NavbarLinkProps {
   icon: typeof IconHome2;
@@ -45,7 +45,12 @@ const mockdata = [
   { icon: IconSettings, label: "Settings" },
 ];
 
-export function NavbarMinimalColored() {
+type Orientation = "horiztonal" | "vertical";
+
+type SlimNavbarProps = {
+  orientation: Orientation;
+};
+export function SlimNavbar({ orientation }: SlimNavbarProps) {
   const [active, setActive] = useState(2);
 
   const links = mockdata.map((link, index) => (
@@ -58,7 +63,7 @@ export function NavbarMinimalColored() {
   ));
 
   return (
-    <nav className={classes.navbar}>
+    <nav className={classes.navbar} data-orientation={orientation}>
       <Center>
         <IconHome />
       </Center>
