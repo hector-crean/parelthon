@@ -1,8 +1,8 @@
 import { createComment } from "@/api/comments";
-import { ResizeContainer } from "@/component/ResizeContainer";
+import { MediaAsectRatioContainer } from "@/component/ResizeContainer";
 import { CreateVideoComment, VideoComment } from "@/models/comment";
 import type { Video } from "@/models/video";
-import { AspectRatio, Slider, rem } from "@mantine/core";
+import { Slider, rem } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
@@ -17,6 +17,8 @@ import {
 
 import { IconPlayerPause, IconPlayerPlay } from "@tabler/icons-react";
 import { throttle } from "lodash";
+import { Frame } from "./Frame";
+import { OutlinePath } from "./OutlinePath";
 import { VideoPin } from "./VideoPin";
 import styles from "./VideoPlayer.module.css";
 
@@ -159,53 +161,69 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
   const handleOnVideoPlay = () => {};
 
   return (
-    <ResizeContainer as="div" className={styles.video_resize_container}>
+    <MediaAsectRatioContainer aspectRatio={[aw, ah]}>
       {({ width, height }) => (
-        <AspectRatio
-          ref={videoContainerRef}
-          maw={`${(width * aw) / ah}px`}
-          mah={`${width / (aw / ah)}px`}
-          w={"100%"}
-        >
-          <div className={styles.video_player_wrapper}>
-            <CursorTooltip position={cursorTooltipPosition}>
-              {isPlaying ? "click to comment" : "click to resume"}
-            </CursorTooltip>
-
-            {/* Video player */}
-            <video
-              data-cursor={isPlaying ? "video-playing" : "video-paused"}
-              controls={false}
-              ref={videoRef}
-              disablePictureInPicture
-              controlsList="nofullscreen"
-              onClick={handleVideoClick}
-              onTimeUpdate={onVideoTimeUpdate}
-              onCanPlay={handleReadyToPlay}
-              onPointerMove={handlePointerMove}
-              onPointerLeave={handlePointerLeave}
-              onPause={handleOnVideoPause}
-              onPlay={handleOnVideoPlay}
-              muted={isMuted}
-              src={videoPayload.s3_url}
-            />
-            {comments.map((comment) => (
-              <VideoPin
-                key={`${comment.comment_id}`}
-                currentTime={currentTime}
-                comment={comment}
+        <Frame
+          width={width}
+          height={height}
+          aspectRatio={[aw, ah]}
+          svgLayer={({ xScale, yScale }) => (
+            <g>
+              <OutlinePath
+                xScale={xScale}
+                yScale={yScale}
+                maskGradientPoints={[
+                  [1, 1],
+                  [2, 2],
+                  [3, 3],
+                ]}
+                maskPoints={[
+                  [1, 1],
+                  [2, 2],
+                  [3, 3],
+                ]}
               />
-            ))}
-            {/* Video controls */}
-            <div
-              style={{ position: "absolute", bottom: "10px", width: "100%" }}
-            >
+            </g>
+          )}
+          canvasLayer={() => null}
+          htmlLayer={() => (
+            <>
+              <CursorTooltip position={cursorTooltipPosition}>
+                {isPlaying ? "click to comment" : "click to resume"}
+              </CursorTooltip>
+
+              {/* Video player */}
+              <video
+                data-cursor={isPlaying ? "video-playing" : "video-paused"}
+                controls={false}
+                ref={videoRef}
+                disablePictureInPicture
+                controlsList="nofullscreen"
+                onClick={handleVideoClick}
+                onTimeUpdate={onVideoTimeUpdate}
+                onCanPlay={handleReadyToPlay}
+                onPointerMove={handlePointerMove}
+                onPointerLeave={handlePointerLeave}
+                onPause={handleOnVideoPause}
+                onPlay={handleOnVideoPlay}
+                muted={isMuted}
+                src={videoPayload.s3_url}
+              />
+              {comments.map((comment) => (
+                <VideoPin
+                  key={`${comment.comment_id}`}
+                  currentTime={currentTime}
+                  comment={comment}
+                />
+              ))}
+              {/* Video controls */}
+
               <Slider
                 // thumbSize={26}
                 styles={{
                   root: {
                     position: "absolute",
-                    bottom: "0px",
+                    bottom: "20px",
                     width: "100%",
                     height: "max-content",
                   },
@@ -250,11 +268,11 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
                   )
                 }
               />
-            </div>
-          </div>
-        </AspectRatio>
+            </>
+          )}
+        />
       )}
-    </ResizeContainer>
+    </MediaAsectRatioContainer>
   );
 };
 

@@ -2,6 +2,7 @@ import { computeMarginForAspectRatio, type Margin } from "@/models/margin";
 import { scaleLinear } from "@visx/scale";
 import { ScaleLinear } from "d3-scale";
 import { ComponentProps, ReactNode, useMemo } from "react";
+import { OutlinePath } from "./OutlinePath";
 
 type SvgProps = PropsWithoutChildren<ComponentProps<"svg">> & {
   children: (args: {
@@ -58,6 +59,7 @@ const Svg = ({
         left: 0,
         height: innerHeight + margin.bottom + margin.top,
         width: innerWidth + margin.left + margin.right,
+        pointerEvents: "none",
       }}
     >
       {children({
@@ -69,7 +71,21 @@ const Svg = ({
   );
 };
 
-export { Svg };
+type OutlinePathADT = {
+  type: "outline-path";
+  props: ComponentProps<typeof OutlinePath>;
+};
+
+type SvgElement = OutlinePathADT;
+
+const renderSvg = (data: SvgElement) => {
+  switch (data.type) {
+    case "outline-path":
+      return <OutlinePath {...data.props} />;
+    default:
+      return <g></g>;
+  }
+};
 
 // utils types
 
@@ -78,3 +94,6 @@ type PropsWithoutChildren<P> = P extends any
     ? Omit<P, "children">
     : P
   : P;
+
+export { Svg };
+export { renderSvg };

@@ -1,21 +1,41 @@
-import { Margin } from "@/models/margin";
 import { CanvasMode, type CanvasState } from "@/types";
 import { Group } from "@visx/group";
-import { ScaleLinear } from "@visx/vendor/d3-scale";
-import { curveCatmullRom, line } from "d3";
+import { ScaleLinear } from "d3";
 import { motion } from "framer-motion";
-import { ReactNode, useCallback, useState } from "react";
+import { ComponentProps, ReactNode, useCallback, useState } from "react";
 import { Svg } from "./Svg";
 
+enum ZIndex {
+  Zero = 0, // 00000000
+  One = 1 << 0, // 00000001
+  Two = 1 << 1, // 00000010
+  Three = 1 << 2, // 00000100
+  Four = 1 << 3, // 00001000
+  Five = 1 << 4, // 00010000
+  Six = 1 << 5, // 00100000
+  Seven = 1 << 6, // 01000000
+  Eight = 1 << 7, // 10000000
+}
+
 const BG_PATTERN_ID = "bg-pattern";
+
+type SvgLayerArgs = {
+  xScale: ScaleLinear<number, number, never>;
+  yScale: ScaleLinear<number, number, never>;
+};
+type CanvasLayerArgs = {};
+type HtmlLayerArgs = {};
 
 interface FrameProps {
   width: number;
   height: number;
   aspectRatio: [number, number];
-  svgLayer: ReactNode;
-  htmlLayer: ReactNode;
-  canvasLayer: ReactNode;
+  svgLayer: (args: {
+    xScale: ScaleLinear<number, number, never>;
+    yScale: ScaleLinear<number, number, never>;
+  }) => ReactNode;
+  htmlLayer: (args: HtmlLayerArgs) => ReactNode;
+  canvasLayer: (args: CanvasLayerArgs) => ReactNode;
 }
 
 const Frame = ({
@@ -34,8 +54,12 @@ const Frame = ({
   const handleMovePointer = useCallback(() => {}, []);
 
   return (
-    <RelativeContainer>
-      <AbsoluteContainer>
+    <RelativeContainer zIndex={ZIndex.Zero}>
+      <AbsoluteContainer
+        id="svg-container"
+        zIndex={ZIndex.Four}
+        style={{ pointerEvents: "none" }}
+      >
         <Svg innerWidth={width} innerHeight={height} aspectRatio={aspectRatio}>
           {({ xScale, yScale, margin }) => (
             <>
@@ -67,23 +91,43 @@ const Frame = ({
               />
 
               <Group top={margin.top} left={margin.left}>
-                {svgLayer}
+                {svgLayer({ xScale, yScale })}
               </Group>
             </>
           )}
         </Svg>
       </AbsoluteContainer>
-
-      <AbsoluteContainer>{htmlLayer}</AbsoluteContainer>
-      <AbsoluteContainer>{htmlLayer}</AbsoluteContainer>
-      <AbsoluteContainer>{canvasLayer}</AbsoluteContainer>
+      <AbsoluteContainer
+        id="html-container"
+        zIndex={ZIndex.Two}
+        style={{ pointerEvents: "all" }}
+      >
+        {htmlLayer({})}
+      </AbsoluteContainer>
+      <AbsoluteContainer
+        id="canvas-container"
+        zIndex={ZIndex.Three}
+        style={{ pointerEvents: "none" }}
+      >
+        {canvasLayer({})}
+      </AbsoluteContainer>
     </RelativeContainer>
   );
 };
 
 export { Frame };
 
-const RelativeContainer = ({ children }: { children: ReactNode }) => {
+type RelativeContainerProps = {
+  zIndex: ZIndex;
+  children: ReactNode;
+} & ComponentProps<typeof motion.div>;
+
+const RelativeContainer = ({
+  children,
+  zIndex,
+  style,
+  ...props
+}: RelativeContainerProps) => {
   return (
     <motion.div
       style={{
@@ -94,22 +138,29 @@ const RelativeContainer = ({ children }: { children: ReactNode }) => {
         justifyContent: "center",
         height: "100%",
         width: "100%",
+        zIndex: zIndex,
+        ...style,
       }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
+      {...props}
     >
       {children}
     </motion.div>
   );
 };
 
+type AbsoluteContainerProps = {
+  zIndex: ZIndex;
+  children: ReactNode;
+} & ComponentProps<typeof motion.div>;
+
 const AbsoluteContainer = ({
   children,
-  margin,
-}: {
-  children: ReactNode;
-  margin?: Margin;
-}) => {
+  zIndex,
+  style,
+  ...props
+}: AbsoluteContainerProps) => {
   return (
     <motion.div
       style={{
@@ -118,111 +169,14 @@ const AbsoluteContainer = ({
         width: "100%",
         top: 0,
         left: 0,
-        // margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
+        zIndex: zIndex,
+        ...style,
       }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
+      {...props}
     >
       {children}
     </motion.div>
-  );
-};
-
-interface OutlinePathsProps {
-  maskGradientPoints: Array<[number, number]>;
-  maskPoints: Array<[number, number]>;
-  xScale: ScaleLinear<number, number, never>;
-  yScale: ScaleLinear<number, number, never>;
-}
-const OutlinePath = ({
-  maskGradientPoints,
-  maskPoints,
-  xScale,
-  yScale,
-}: OutlinePathsProps) => {
-  const accessorX = (d: [number, number]) => xScale(d[0]);
-  const accessorY = (d: [number, number]) => yScale(d[1]);
-
-  const pathFn = line()
-    .x(accessorX)
-    .y(accessorY)
-    .curve(curveCatmullRom.alpha(0.5));
-
-  return (
-    <>
-      <radialGradient
-        id="gradient"
-        cx="0"
-        cy="0"
-        r="267"
-        gradientUnits="userSpaceOnUse"
-        gradientTransform="translate(491.25,402)"
-      >
-        <stop offset="0" stop-color="white" stop-opacity="0"></stop>
-        <stop offset="0.25" stop-color="white" stop-opacity="0.7"></stop>
-        <stop offset="0.5" stop-color="white" stop-opacity="0"></stop>
-        <stop offset="0.75" stop-color="white" stop-opacity="0.7"></stop>
-        <stop offset="1" stop-color="white" stop-opacity="0"></stop>
-        <animateTransform
-          attributeName="gradientTransform"
-          attributeType="XML"
-          type="scale"
-          from="0"
-          to="12"
-          dur="1.5s"
-          begin=".3s"
-          fill="freeze"
-          additive="sum"
-        ></animateTransform>
-      </radialGradient>
-
-      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow
-          dx="0"
-          dy="0"
-          stdDeviation="2"
-          flood-color="#1d85bb"
-        ></feDropShadow>
-        <feDropShadow
-          dx="0"
-          dy="0"
-          stdDeviation="4"
-          flood-color="#1d85bb"
-        ></feDropShadow>
-        <feDropShadow
-          dx="0"
-          dy="0"
-          stdDeviation="6"
-          flood-color="#1d85bb"
-        ></feDropShadow>
-      </filter>
-
-      <clipPath id="clip-path">
-        <path d="" />
-      </clipPath>
-
-      <path
-        id="mask-gradient"
-        className="mask-gradient"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-opacity="0"
-        fill-opacity="1"
-        fill="url(#gradient)"
-        d={pathFn(maskGradientPoints) ?? ""}
-      ></path>
-      <path
-        id="mask-path"
-        className="mask-path"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-opacity=".8"
-        fill-opacity="0"
-        stroke="#1d85bb"
-        stroke-width="3"
-        filter="url(#glow)"
-        d={pathFn(maskPoints) ?? ""}
-      ></path>
-    </>
   );
 };

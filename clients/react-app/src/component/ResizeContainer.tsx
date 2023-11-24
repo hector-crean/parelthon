@@ -1,3 +1,4 @@
+import { AspectRatio } from "@mantine/core";
 import { throttle } from "lodash";
 import {
   ComponentPropsWithoutRef,
@@ -10,12 +11,16 @@ import {
 } from "react";
 import styles from "./ResizeContainer.module.css";
 
-
 type ResizeContainerProps<T extends ElementType> = PropsWithoutChildren<
   ComponentPropsWithoutRef<T>
 > & {
   as: T;
-  children: ChildFn;
+  children: (
+    args: {
+      ref: HTMLElement | null;
+      resize: (state: DOMRectReadOnly) => void;
+    } & Rect
+  ) => ReactNode;
 };
 
 const ResizeContainer = <T extends ElementType>({
@@ -77,6 +82,40 @@ const ResizeContainer = <T extends ElementType>({
   );
 };
 
+interface MediaAsectRatioContainerProps {
+  aspectRatio: [number, number];
+  children: (args: { width: number; height: number }) => ReactNode;
+}
+const MediaAsectRatioContainer = ({
+  aspectRatio: [aw, ah],
+  children,
+}: MediaAsectRatioContainerProps) => {
+  return (
+    <ResizeContainer
+      as="div"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {({ width, height }) => (
+        <AspectRatio
+          maw={`${(width * aw) / ah}px`}
+          mah={`${width / (aw / ah)}px`}
+          w={"100%"}
+        >
+          <ResizeContainer as="div">
+            {({ width: innerWidth, height: innerHeight }) =>
+              children({ width: innerWidth, height: innerHeight })
+            }
+          </ResizeContainer>
+        </AspectRatio>
+      )}
+    </ResizeContainer>
+  );
+};
 
 // util types:
 type PropsWithoutChildren<P> = P extends any
@@ -85,19 +124,11 @@ type PropsWithoutChildren<P> = P extends any
     : P
   : P;
 
-type ChildFn = (
-    args: {
-      ref: HTMLElement | null;
-      resize: (state: DOMRectReadOnly) => void;
-    } & Rect
-  ) => ReactNode;
-  
-  interface Rect {
-    width: number;
-    height: number;
-    top: number;
-    left: number;
-  }
+interface Rect {
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+}
 
-
-export { ResizeContainer };
+export { ResizeContainer, MediaAsectRatioContainer };
