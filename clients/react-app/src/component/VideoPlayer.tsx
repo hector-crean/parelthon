@@ -2,7 +2,7 @@ import { createComment } from "@/api/comments";
 import { ResizeContainer } from "@/component/ResizeContainer";
 import { CreateVideoComment, VideoComment } from "@/models/comment";
 import type { Video } from "@/models/video";
-import { AspectRatio } from "@mantine/core";
+import { AspectRatio, Slider, rem } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
@@ -10,24 +10,17 @@ import {
   ReactNode,
   memo,
   useCallback,
+  useEffect,
   useRef,
   useState,
 } from "react";
 
+import { IconPlayerPause, IconPlayerPlay } from "@tabler/icons-react";
 import { throttle } from "lodash";
 import { VideoPin } from "./VideoPin";
 import styles from "./VideoPlayer.module.css";
 
-function getPointerPositionWithinElement(
-  element: HTMLElement,
-  event: PointerEvent<HTMLElement>
-): { x: number; y: number } {
-  const rect = element.getBoundingClientRect();
-  const left = event.clientX - rect.left;
-  const top = event.clientY - rect.top;
 
-  return { x: (left / rect.width) * 100, y: (top / rect.height) * 100 };
-}
 
 ///
 
@@ -44,7 +37,8 @@ type VideoPlayerProps = {
 
 const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
   //vars
-  const [aw, ah] = [16, 9];
+
+  const [[aw, ah], setAspectRatio] = useState<[number, number]>([16, 9])
 
   //refs
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
@@ -72,6 +66,22 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
     useState<ReactNode>(null);
 
   //queries + mutations
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+    // Check if the video metadata has loaded (necessary for accurate values)
+    if (videoRef.current.readyState >= 2) {
+      // Get the intrinsic width and height of the video
+      const intrinsicWidth = videoRef.current.videoWidth;
+      const intrinsicHeight = videoRef.current.videoHeight;
+      console.log(intrinsicWidth, intrinsicHeight)
+      setAspectRatio([intrinsicWidth, intrinsicHeight])
+
+    }
+  }, [videoRef.current])
+
+
+
   const commentsMutation = useMutation({
     mutationFn: (requestBody: CreateVideoComment) => {
       return createComment(requestBody);
@@ -129,7 +139,16 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
     []
   );
 
-  const handleReadyToPlay = () => {};
+  const handleSliderCommit = useCallback((value: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = value;
+      setCurrentTime(value);
+
+    }
+  }, []);
+
+
+  const handleReadyToPlay = () => { };
 
   const handlePointerMove = useCallback(
     throttle((e: PointerEvent<HTMLVideoElement>) => {
@@ -140,31 +159,30 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
     }, 10),
     [videoRef]
   );
-  const handlePointerLeave = () => {};
+  const handlePointerLeave = () => { };
 
-  const handleOnVideoPause = useCallback(() => {}, []);
+  const handleOnVideoPause = useCallback(() => { }, []);
 
-  const handleOnVideoPlay = () => {};
+  const handleOnVideoPlay = () => { };
 
   return (
-    <ResizeContainer as="div">
+    <ResizeContainer as="div" className={styles.video_resize_container}>
       {({ width, height }) => (
-        <>
-          <AspectRatio
-            ref={videoContainerRef}
-            maw={`${(width * aw) / ah}px`}
-            mah={`${width / (aw / ah)}px`}
-            className={styles.video_player_wrapper}
-            w={"100%"}
-            pos={"relative"}
-          >
-            {/* <Svg innerWidth={width} innerHeight={height} aspectRatio={[aw, ah]}>
-            {({ xScale, yScale }) => null}
-          </Svg> */}
+        <AspectRatio
+          ref={videoContainerRef}
+          maw={`${(width * aw) / ah}px`}
+          mah={`${width / (aw / ah)}px`}
+          w={"100%"}
+        >
+          <div className={styles.video_player_wrapper}>
+            <CursorTooltip position={cursorTooltipPosition}>
+              {isPlaying ? "click to comment" : "click to resume"}
+            </CursorTooltip>
+
+            {/* Video player */}
             <video
-              className={styles.video}
               data-cursor={isPlaying ? "video-playing" : "video-paused"}
-              controls
+              controls={false}
               ref={videoRef}
               disablePictureInPicture
               controlsList="nofullscreen"
@@ -177,29 +195,67 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
               onPlay={handleOnVideoPlay}
               muted={isMuted}
               src={videoPayload.s3_url}
-              style={{
-                width,
-                height,
-              }}
             />
-          </AspectRatio>
-          {comments.map((comment) => (
-            <VideoPin
-              key={`${comment.comment_id}`}
-              currentTime={currentTime}
-              comment={comment}
-            />
-          ))}
-          <CursorTooltip position={cursorTooltipPosition}>
-            {isPlaying ? "click to comment" : "click to resume"}
-          </CursorTooltip>
-        </>
+            {comments.map((comment) => (
+              <VideoPin
+                key={`${comment.comment_id}`}
+                currentTime={currentTime}
+                comment={comment}
+              />
+            ))}
+            {/* Video controls */}
+            <div style={{ position: 'absolute', bottom: '10px', width: '100%' }}>
+              <Slider
+
+                // thumbSize={26}
+                styles={{
+                  root: { position: 'absolute', bottom: '0px', width: '100%', height: 'max-content' },
+                  // label: {},
+                  thumb: {
+                    borderWidth: rem(2),
+                    padding: rem(3)
+                  },
+                  trackContainer: {
+                    backgroundColor: 'transparent',
+                  },
+                  track: {
+                    backgroundColor: 'transparent',
+
+                  },
+                  bar: {
+                    backgroundColor: 'transparent',
+
+                  },
+
+                  // markWrapper: {},
+                  // mark: {},
+                  // markLabel: {}
+
+                }}
+                thumbSize={rem(25)}
+                min={0}
+                max={duration}
+                value={currentTime}
+                precision={2}
+                step={0.1}
+                onChange={(v) => handleSliderCommit(v)}
+                // marks={comments.map(c => ({ value: c.start_time, label: c.comment_id }))}
+                thumbChildren={isPlaying ? <IconPlayerPause size={rem(1)} onPointerDown={togglePlayPause} /> : <IconPlayerPlay size={rem(1)} onPointerDown={togglePlayPause} />}
+
+              />
+            </div>
+          </div>
+        </AspectRatio>
       )}
     </ResizeContainer>
   );
 };
 
 export { VideoPlayer };
+
+
+
+
 
 interface CursorTooltipProps {
   position: { x: number; y: number };
@@ -228,3 +284,18 @@ const CursorTooltip = memo(({ position, children }: CursorTooltipProps) => {
     </motion.div>
   );
 });
+
+
+
+//utils
+
+function getPointerPositionWithinElement(
+  element: HTMLElement,
+  event: PointerEvent<HTMLElement>
+): { x: number; y: number } {
+  const rect = element.getBoundingClientRect();
+  const left = event.clientX - rect.left;
+  const top = event.clientY - rect.top;
+
+  return { x: (left / rect.width) * 100, y: (top / rect.height) * 100 };
+}

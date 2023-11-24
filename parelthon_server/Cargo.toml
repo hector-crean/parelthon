@@ -82,6 +82,14 @@ tokio-tungstenite = "0.20"
 axum_typed_multipart = "0.10.1"
 tempfile = "3"
 hyper = "0.14.27"
+candle-core = { version = "0.3.1" }
+anyhow = "1.0.75"
+candle-transformers = "0.3.1"
+candle-nn = "0.3.1"
+candle-examples = "0.3.1"
+tracing-chrome = "0.7.1"
+image = "0.24.7"
+hf-hub = "0.3.2"
 
 [dev-dependencies]
 hyper = { version = "0.14.17", features = ["full"] }

@@ -2,6 +2,7 @@ pub mod comment;
 pub mod s3;
 pub mod user;
 pub mod video;
+pub mod segment_anything;
 
 use axum::response::{IntoResponse, Response};
 use http::StatusCode;

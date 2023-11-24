@@ -24,7 +24,6 @@
       padding: var(--space);
       gap: var(--space);
       grid-template-areas:
-        "horizontal_slim_navbar_wrapper"
         "video_player_wrapper"
         "sidebar_wrapper"
         "overview_wrapper";
@@ -74,7 +73,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: black;
     overflow: hidden;
     border-radius: 10px;
 

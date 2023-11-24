@@ -39,7 +39,7 @@ const VideoPin = ({
 
                 zIndex: 200,
                 position: "absolute",
-                border: "1px solid black",
+                border: "0px",
                 backgroundColor: "transparent",
                 left: `${screen_x}%`,
                 top: `${screen_y}%`,

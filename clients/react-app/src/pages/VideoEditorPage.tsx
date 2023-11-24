@@ -1,31 +1,17 @@
 import { getVideoWithCommentsByVideoId } from "@/api/comments";
 import { QueryResult } from "@/component/QueryResult";
+import { VideoPlayer, VideoPlayerMode } from "@/component/VideoPlayer";
 import { VideoLayout } from "@/layouts/VideoLayout";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
-import styles from "./video-editor-page.module.css";
 
 const VideoEditorPage = () => {
-  const [, params] = useRoute("/editor/videos/:video_id*");
+  const [_, params] = useRoute("/editor/videos/:video_id*");
 
-  return (
-    <div className={styles.video_editor_wrapper}>
-      <div className={styles.video_editor}>
-        {params?.video_id ? (
-          <VideoEditorPageInner videoId={params?.video_id} />
-        ) : (
-          <div></div>
-        )}
-      </div>
-    </div>
-  );
-};
+  const videoId = params?.video_id;
 
-interface VideoEditorPageInnerProps {
-  videoId: string;
-}
+  if(!videoId) return null;
 
-const VideoEditorPageInner = ({ videoId }: VideoEditorPageInnerProps) => {
   const getVideoWithCommentsQuery = useQuery({
     queryKey: [`video:${videoId}`],
     queryFn: () => getVideoWithCommentsByVideoId(videoId),
@@ -35,16 +21,18 @@ const VideoEditorPageInner = ({ videoId }: VideoEditorPageInnerProps) => {
     <QueryResult queryResult={getVideoWithCommentsQuery}>
       {({ data }) => (
         <VideoLayout>
-          {/* <VideoPlayer
+          <VideoPlayer
           videoPayload={data.video}
           mode={VideoPlayerMode.Editor}
           videoComments={data.comments}
-        /> */}
-          <video src={data.video.s3_url} />
+        />
         </VideoLayout>
       )}
     </QueryResult>
   );
 };
+
+
+
 
 export { VideoEditorPage };
