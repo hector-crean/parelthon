@@ -20,8 +20,6 @@ import { throttle } from "lodash";
 import { VideoPin } from "./VideoPin";
 import styles from "./VideoPlayer.module.css";
 
-
-
 ///
 
 export enum VideoPlayerMode {
@@ -38,7 +36,7 @@ type VideoPlayerProps = {
 const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
   //vars
 
-  const [[aw, ah], setAspectRatio] = useState<[number, number]>([16, 9])
+  const [[aw, ah], setAspectRatio] = useState<[number, number]>([16, 9]);
 
   //refs
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
@@ -74,13 +72,10 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
       // Get the intrinsic width and height of the video
       const intrinsicWidth = videoRef.current.videoWidth;
       const intrinsicHeight = videoRef.current.videoHeight;
-      console.log(intrinsicWidth, intrinsicHeight)
-      setAspectRatio([intrinsicWidth, intrinsicHeight])
-
+      console.log(intrinsicWidth, intrinsicHeight);
+      setAspectRatio([intrinsicWidth, intrinsicHeight]);
     }
-  }, [videoRef.current])
-
-
+  }, [videoRef.current]);
 
   const commentsMutation = useMutation({
     mutationFn: (requestBody: CreateVideoComment) => {
@@ -143,12 +138,10 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
     if (videoRef.current) {
       videoRef.current.currentTime = value;
       setCurrentTime(value);
-
     }
   }, []);
 
-
-  const handleReadyToPlay = () => { };
+  const handleReadyToPlay = () => {};
 
   const handlePointerMove = useCallback(
     throttle((e: PointerEvent<HTMLVideoElement>) => {
@@ -159,11 +152,11 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
     }, 10),
     [videoRef]
   );
-  const handlePointerLeave = () => { };
+  const handlePointerLeave = () => {};
 
-  const handleOnVideoPause = useCallback(() => { }, []);
+  const handleOnVideoPause = useCallback(() => {}, []);
 
-  const handleOnVideoPlay = () => { };
+  const handleOnVideoPlay = () => {};
 
   return (
     <ResizeContainer as="div" className={styles.video_resize_container}>
@@ -204,33 +197,36 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
               />
             ))}
             {/* Video controls */}
-            <div style={{ position: 'absolute', bottom: '10px', width: '100%' }}>
+            <div
+              style={{ position: "absolute", bottom: "10px", width: "100%" }}
+            >
               <Slider
-
                 // thumbSize={26}
                 styles={{
-                  root: { position: 'absolute', bottom: '0px', width: '100%', height: 'max-content' },
+                  root: {
+                    position: "absolute",
+                    bottom: "0px",
+                    width: "100%",
+                    height: "max-content",
+                  },
                   // label: {},
                   thumb: {
                     borderWidth: rem(2),
-                    padding: rem(3)
+                    padding: rem(3),
                   },
                   trackContainer: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: "transparent",
                   },
                   track: {
-                    backgroundColor: 'transparent',
-
+                    backgroundColor: "transparent",
                   },
                   bar: {
-                    backgroundColor: 'transparent',
-
+                    backgroundColor: "transparent",
                   },
 
                   // markWrapper: {},
                   // mark: {},
                   // markLabel: {}
-
                 }}
                 thumbSize={rem(25)}
                 min={0}
@@ -240,8 +236,19 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
                 step={0.1}
                 onChange={(v) => handleSliderCommit(v)}
                 // marks={comments.map(c => ({ value: c.start_time, label: c.comment_id }))}
-                thumbChildren={isPlaying ? <IconPlayerPause size={rem(1)} onPointerDown={togglePlayPause} /> : <IconPlayerPlay size={rem(1)} onPointerDown={togglePlayPause} />}
-
+                thumbChildren={
+                  isPlaying ? (
+                    <IconPlayerPause
+                      size={rem(1)}
+                      onPointerDown={togglePlayPause}
+                    />
+                  ) : (
+                    <IconPlayerPlay
+                      size={rem(1)}
+                      onPointerDown={togglePlayPause}
+                    />
+                  )
+                }
               />
             </div>
           </div>
@@ -252,10 +259,6 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
 };
 
 export { VideoPlayer };
-
-
-
-
 
 interface CursorTooltipProps {
   position: { x: number; y: number };
@@ -284,8 +287,6 @@ const CursorTooltip = memo(({ position, children }: CursorTooltipProps) => {
     </motion.div>
   );
 });
-
-
 
 //utils
 
