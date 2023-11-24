@@ -1,4 +1,5 @@
 import { CanvasMode, type CanvasState } from "@/types";
+import { GradientPinkBlue } from "@visx/gradient";
 import { Group } from "@visx/group";
 import { ScaleLinear } from "d3";
 import { motion } from "framer-motion";
@@ -63,7 +64,7 @@ const Frame = ({
         <Svg innerWidth={width} innerHeight={height} aspectRatio={aspectRatio}>
           {({ xScale, yScale, margin }) => (
             <>
-              <defs></defs>
+              <GradientPinkBlue id={BG_PATTERN_ID} />
               {/* background */}
               <rect
                 x={0}
@@ -77,17 +78,16 @@ const Frame = ({
                 // onPointerMove={handleMovePointer}
               />
               {/* background */}
-              <motion.rect
+              <rect
                 x={margin.left}
                 y={margin.top}
-                width={innerWidth}
-                height={innerHeight}
+                width={width}
+                height={height}
                 fill={`url(#${BG_PATTERN_ID})`}
                 fillOpacity={0.3}
                 pointerEvents={"none"}
-                initial={false}
                 //   animate={{ stdDeviation: isHovered ? 0 : 10 }}
-                filter="url(#my-filter)"
+                // filter="url(#my-filter)"
               />
 
               <Group top={margin.top} left={margin.left}>

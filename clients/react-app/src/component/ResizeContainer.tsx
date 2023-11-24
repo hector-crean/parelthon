@@ -46,7 +46,7 @@ const ResizeContainer = <T extends ElementType>({
     () =>
       throttle(({ width, height, top, left }: DOMRectReadOnly) => {
         setContainerRect({ width, height, top, left });
-      }, 300), // Throttling to at most once every 100 milliseconds
+      }, 100), // Throttling to at most once every 100 milliseconds
     []
   );
 
@@ -82,14 +82,19 @@ const ResizeContainer = <T extends ElementType>({
   );
 };
 
-interface MediaAsectRatioContainerProps {
+/**
+ * This component creates a centred child of the aspect ratio specified. We can then stack
+ * a video/image under svgs/html/canvas (all in alignment)
+ */
+
+interface MediaAspectRatioContainerProps {
   aspectRatio: [number, number];
   children: (args: { width: number; height: number }) => ReactNode;
 }
-const MediaAsectRatioContainer = ({
+const MediaAspectRatioContainer = ({
   aspectRatio: [aw, ah],
   children,
-}: MediaAsectRatioContainerProps) => {
+}: MediaAspectRatioContainerProps) => {
   return (
     <ResizeContainer
       as="div"
@@ -131,4 +136,4 @@ interface Rect {
   left: number;
 }
 
-export { ResizeContainer, MediaAsectRatioContainer };
+export { ResizeContainer, MediaAspectRatioContainer };

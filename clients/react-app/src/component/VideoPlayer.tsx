@@ -1,5 +1,5 @@
 import { createComment } from "@/api/comments";
-import { MediaAsectRatioContainer } from "@/component/ResizeContainer";
+import { MediaAspectRatioContainer } from "@/component/ResizeContainer";
 import { CreateVideoComment, VideoComment } from "@/models/comment";
 import type { Video } from "@/models/video";
 import { Slider, rem } from "@mantine/core";
@@ -161,7 +161,7 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
   const handleOnVideoPlay = () => {};
 
   return (
-    <MediaAsectRatioContainer aspectRatio={[aw, ah]}>
+    <MediaAspectRatioContainer aspectRatio={[aw, ah]}>
       {({ width, height }) => (
         <Frame
           width={width}
@@ -173,14 +173,14 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
                 xScale={xScale}
                 yScale={yScale}
                 maskGradientPoints={[
-                  [1, 1],
-                  [2, 2],
-                  [3, 3],
+                  [0.2, 0.1],
+                  [0.8, 0.1],
+                  [0.4, 0.1],
                 ]}
                 maskPoints={[
-                  [1, 1],
-                  [2, 2],
-                  [3, 3],
+                  [0.2, 0.1],
+                  [0.8, 0.1],
+                  [0.4, 0.1],
                 ]}
               />
             </g>
@@ -272,7 +272,7 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
           )}
         />
       )}
-    </MediaAsectRatioContainer>
+    </MediaAspectRatioContainer>
   );
 };
 
