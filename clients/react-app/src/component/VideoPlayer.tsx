@@ -15,12 +15,14 @@ import {
   useState,
 } from "react";
 
+import { CanvasMode, CanvasState } from "@/types";
 import { IconPlayerPause, IconPlayerPlay } from "@tabler/icons-react";
 import { throttle } from "lodash";
 import { Frame } from "./Frame";
 import { OutlinePath } from "./OutlinePath";
-import { VideoPin } from "./VideoPin";
+import ToolsBar from "./ToolsBar";
 import styles from "./VideoPlayer.module.css";
+import { Label } from "./labels/Label";
 
 ///
 
@@ -64,6 +66,8 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
   });
   const [cursorTooltipContent, setCursorTooltipContent] =
     useState<ReactNode>(null);
+
+  const [canvasState, setCanvasState] = useState<CanvasState>({ mode: CanvasMode.None })
 
   //queries + mutations
 
@@ -143,7 +147,7 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
     }
   }, []);
 
-  const handleReadyToPlay = () => {};
+  const handleReadyToPlay = () => { };
 
   const handlePointerMove = useCallback(
     throttle((e: PointerEvent<HTMLVideoElement>) => {
@@ -154,11 +158,11 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
     }, 10),
     [videoRef]
   );
-  const handlePointerLeave = () => {};
+  const handlePointerLeave = () => { };
 
-  const handleOnVideoPause = useCallback(() => {}, []);
+  const handleOnVideoPause = useCallback(() => { }, []);
 
-  const handleOnVideoPlay = () => {};
+  const handleOnVideoPlay = () => { };
 
   return (
     <MediaAspectRatioContainer aspectRatio={[aw, ah]}>
@@ -209,17 +213,27 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
                 muted={isMuted}
                 src={videoPayload.s3_url}
               />
-              {comments.map((comment) => (
+              {/* {comments.map((comment) => (
                 <VideoPin
                   key={`${comment.comment_id}`}
                   currentTime={currentTime}
                   comment={comment}
                 />
+              ))} */}
+
+              {comments.map((comment) => (
+                <Label
+                  key={`${comment.comment_id}`}
+                  currentTime={currentTime}
+                  comment={comment}
+                />
               ))}
+
+
               {/* Video controls */}
+              <ToolsBar canvasState={canvasState} setCanvasState={setCanvasState} undo={() => { }} redo={() => { }} canUndo={true} canRedo={true} />
 
               <Slider
-                // thumbSize={26}
                 styles={{
                   root: {
                     position: "absolute",

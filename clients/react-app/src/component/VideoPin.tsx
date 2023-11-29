@@ -1,9 +1,8 @@
 import { VideoComment } from "@/models/comment";
 import { Popover } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { AnimatePresence, motion } from "framer-motion";
 import { CommentAdder } from "./CommentAdder";
-
-import { useDisclosure } from "@mantine/hooks";
 import styles from "./VideoPin.module.css";
 // Control how long should a pin stay on the video, before
 // moving back to the controls.
@@ -13,6 +12,8 @@ interface VideoPinProps {
   comment: VideoComment;
   currentTime: number;
 }
+
+
 const VideoPin = ({
   comment: { screen_x, screen_y, start_time, end_time, comment_text },
   currentTime,
@@ -36,7 +37,6 @@ const VideoPin = ({
               className={styles.video_pin}
               style={{
                 transform: "translate(-50%, -50%)",
-
                 zIndex: 200,
                 position: "absolute",
                 border: "0px",
@@ -45,9 +45,6 @@ const VideoPin = ({
                 top: `${screen_y}%`,
                 width: 30,
                 height: 30,
-                // display: "flex",
-                // alignItems: "center",
-                // justifyContent: "center",
               }}
               initial={{
                 opacity: 0,
@@ -74,5 +71,7 @@ const VideoPin = ({
     </AnimatePresence>
   );
 };
+
+
 
 export { VideoPin };
