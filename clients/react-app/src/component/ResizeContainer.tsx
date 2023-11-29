@@ -4,7 +4,7 @@ import {
   ComponentPropsWithoutRef,
   ElementType,
   ReactNode,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -50,7 +50,7 @@ const ResizeContainer = <T extends ElementType>({
     []
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const observer = new ResizeObserver((entries) => {
       entries.forEach((entry) => {
         animationFrameID.current = window.requestAnimationFrame(() => {

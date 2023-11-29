@@ -1,7 +1,6 @@
 "use-client";
 
 import { SlimNavbar } from "@/component/SlimNavbar";
-import { Tabs, tabs } from "@/component/tabs/Tabs";
 import { exitFullscreenIconPath } from "@/icons/ExitFullscreen";
 import { fullscreenIconPath } from "@/icons/Fullscreen";
 import clsx from "clsx";
@@ -119,11 +118,14 @@ const Coverup = () => {
 };
 
 interface VideoLayoutProps {
-  children: ReactNode;
+  video: ReactNode;
+  sidebar: ReactNode;
+  expandingFooter: ReactNode;
 }
 
-const VideoLayout = ({ children }: VideoLayoutProps) => {
+const VideoLayout = ({ video, sidebar, expandingFooter }: VideoLayoutProps) => {
   const [overviewExpanded, setOverviewExpanded] = useState(false);
+
   return (
     <div className={styles.layout_grid_wrapper}>
       <div className={styles.layout_grid_inner}>
@@ -137,12 +139,13 @@ const VideoLayout = ({ children }: VideoLayoutProps) => {
         </div>
 
         <div className={clsx(styles.grid_item, styles.video_player_wrapper)}>
-          {children}
+          {video}
           <Coverup />
         </div>
 
         <div className={clsx(styles.grid_item, styles.sidebar_wrapper)}>
-          <Tabs initialTabs={tabs} />
+          {/* <Tabs initialTabs={tabs} /> */}
+          {sidebar}
         </div>
 
         <motion.div
@@ -160,7 +163,7 @@ const VideoLayout = ({ children }: VideoLayoutProps) => {
               damping: 30,
             }}
           >
-            Bottom
+            {expandingFooter}
           </motion.div>
         </motion.div>
       </div>

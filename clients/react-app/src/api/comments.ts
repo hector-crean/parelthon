@@ -4,9 +4,6 @@ import { API_BASE_URL } from ".";
 
 const createComment = async (requestBody: CreateVideoComment): Promise<VideoComment> => {
 
-    console.log(requestBody)
-
-
     const response = await fetch(`${API_BASE_URL}/comments`, {
         method: 'POST',
         headers: {

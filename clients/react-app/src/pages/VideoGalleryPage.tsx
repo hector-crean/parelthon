@@ -12,19 +12,19 @@ import styles from "./VideoGallery.module.css";
 type VideoCardProps = ComponentProps<typeof Video> & VideoModel;
 
 const VideoCard = (props: VideoCardProps) => {
-  const [location, setLocation] = useLocation();
+  const [_, setLocation] = useLocation();
 
   return (
     <AspectRatio ratio={16 / 9}>
       <Video
         {...props}
-        onClick={() => setLocation(`/editor/videos/${props.video_id}`)}
+        onClick={() => setLocation(`/videos/${props.video_id}`)}
       />
     </AspectRatio>
   );
 };
 
-const VideoGallery = () => {
+const VideoGalleryPage = () => {
   const videosQuery = useQuery({ queryKey: ["videos"], queryFn: getVideos });
 
   return (
@@ -48,4 +48,4 @@ const VideoGallery = () => {
   );
 };
 
-export { VideoGallery };
+export { VideoGalleryPage };

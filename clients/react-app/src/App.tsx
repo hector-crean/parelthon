@@ -7,11 +7,8 @@ import "./App.css";
 import { MantineProvider, createTheme } from "@mantine/core";
 import { useDisclosure, useHeadroom } from "@mantine/hooks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
 import { Route, Switch } from "wouter";
-
-import { VideoEditorPage } from "@/pages/VideoEditorPage";
-import { VideoGallery } from "@/pages/VideoGalleryPage";
+import { routes } from "./routes";
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -36,11 +33,9 @@ const App = () => {
     <MantineProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <Switch>
-          <Route path="/editor/videos" component={VideoGallery} />
-          <Route
-            path="/editor/videos/:video_id"
-            component={VideoEditorPage}
-          ></Route>
+          {routes.map(({ path, component }) => (
+            <Route path={path} component={component} />
+          ))}
         </Switch>
       </QueryClientProvider>
     </MantineProvider>

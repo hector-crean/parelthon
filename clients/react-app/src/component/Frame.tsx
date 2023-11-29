@@ -27,6 +27,8 @@ type SvgLayerArgs = {
 type CanvasLayerArgs = {};
 type HtmlLayerArgs = {};
 
+type AudioArgs = {};
+
 interface FrameProps {
   width: number;
   height: number;

@@ -35,31 +35,25 @@ type VideoPlayerProps = {
   mode: VideoPlayerMode;
   videoPayload: Video;
   videoComments: Array<VideoComment>;
+  changeVideo: (videoId: string) => void;
 };
 
 const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
-  //vars
-
-  const [[aw, ah], setAspectRatio] = useState<[number, number]>([16, 9]);
-
   //refs
-  const videoContainerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   //state
   const [comments, setComments] = useState<Array<VideoComment>>(videoComments);
-
+  const [[aw, ah], setAspectRatio] = useState<[number, number]>([16, 9]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
   const [subtitlesShowing, setSubtitlesShowing] = useState(false);
-
   const [volume, setVolume] = useState(1);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-
   const [cursorTooltipPosition, setTooltipPosition] = useState({
     x: 0,
     y: 0,
@@ -67,7 +61,9 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
   const [cursorTooltipContent, setCursorTooltipContent] =
     useState<ReactNode>(null);
 
-  const [canvasState, setCanvasState] = useState<CanvasState>({ mode: CanvasMode.None })
+  const [canvasState, setCanvasState] = useState<CanvasState>({
+    mode: CanvasMode.None,
+  });
 
   //queries + mutations
 
@@ -113,18 +109,18 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
     (e: PointerEvent<HTMLVideoElement>) => {
       if (!videoRef.current) return;
 
-      if (isPlaying) {
-        const { x, y } = getPointerPositionWithinElement(videoRef.current, e);
-        const createCommentPayload: CreateVideoComment = {
-          comment_text: "Some sort of comment seems appropriate",
-          coordinates: { x, y },
-          start_time: videoRef.current.currentTime,
-          video_id: videoPayload.video_id,
-        };
-        commentsMutation.mutate(createCommentPayload, {
-          onSuccess: (data) => setComments((prev) => [...prev, data]),
-        });
-      }
+      // if (isPlaying) {
+      //   const { x, y } = getPointerPositionWithinElement(videoRef.current, e);
+      //   const createCommentPayload: CreateVideoComment = {
+      //     comment_text: "Some sort of comment seems appropriate",
+      //     coordinates: { x, y },
+      //     start_time: videoRef.current.currentTime,
+      //     video_id: videoPayload.video_id,
+      //   };
+      //   commentsMutation.mutate(createCommentPayload, {
+      //     onSuccess: (data) => setComments((prev) => [...prev, data]),
+      //   });
+      // }
       togglePlayPause();
     },
     [isPlaying, commentsMutation]
@@ -147,7 +143,7 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
     }
   }, []);
 
-  const handleReadyToPlay = () => { };
+  const handleReadyToPlay = () => {};
 
   const handlePointerMove = useCallback(
     throttle((e: PointerEvent<HTMLVideoElement>) => {
@@ -155,14 +151,14 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
         const { x, y } = getPointerPositionWithinElement(videoRef.current, e);
         setTooltipPosition({ x, y });
       }
-    }, 10),
+    }, 100),
     [videoRef]
   );
-  const handlePointerLeave = () => { };
+  const handlePointerLeave = () => {};
 
-  const handleOnVideoPause = useCallback(() => { }, []);
+  const handleOnVideoPause = useCallback(() => {}, []);
 
-  const handleOnVideoPlay = () => { };
+  const handleOnVideoPlay = () => {};
 
   return (
     <MediaAspectRatioContainer aspectRatio={[aw, ah]}>
@@ -172,22 +168,16 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
           height={height}
           aspectRatio={[aw, ah]}
           svgLayer={({ xScale, yScale }) => (
-            <g>
-              <OutlinePath
-                xScale={xScale}
-                yScale={yScale}
-                maskGradientPoints={[
-                  [0.2, 0.1],
-                  [0.8, 0.1],
-                  [0.4, 0.1],
-                ]}
-                maskPoints={[
-                  [0.2, 0.1],
-                  [0.8, 0.1],
-                  [0.4, 0.1],
-                ]}
-              />
-            </g>
+            <OutlinePath
+              xScale={xScale}
+              yScale={yScale}
+              points={[
+                [1, 0],
+                [0.3, 0.3],
+                [0.9, 0.4],
+                [1, 0],
+              ]}
+            />
           )}
           canvasLayer={() => null}
           htmlLayer={() => (
@@ -213,13 +203,6 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
                 muted={isMuted}
                 src={videoPayload.s3_url}
               />
-              {/* {comments.map((comment) => (
-                <VideoPin
-                  key={`${comment.comment_id}`}
-                  currentTime={currentTime}
-                  comment={comment}
-                />
-              ))} */}
 
               {comments.map((comment) => (
                 <Label
@@ -229,9 +212,15 @@ const VideoPlayer = ({ videoPayload, videoComments }: VideoPlayerProps) => {
                 />
               ))}
 
-
               {/* Video controls */}
-              <ToolsBar canvasState={canvasState} setCanvasState={setCanvasState} undo={() => { }} redo={() => { }} canUndo={true} canRedo={true} />
+              <ToolsBar
+                canvasState={canvasState}
+                setCanvasState={setCanvasState}
+                undo={() => {}}
+                redo={() => {}}
+                canUndo={true}
+                canRedo={true}
+              />
 
               <Slider
                 styles={{

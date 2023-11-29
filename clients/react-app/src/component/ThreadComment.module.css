@@ -1,0 +1,10 @@
+.container {
+  width: 100%;
+
+  .comment_header {
+    width: 100%;
+  }
+  .comment_body {
+    width: 100%;
+  }
+}
