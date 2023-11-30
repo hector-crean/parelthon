@@ -34,7 +34,7 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <Switch>
           {routes.map(({ path, component }) => (
-            <Route path={path} component={component} />
+            <Route key={`${path}`} path={path} component={component} />
           ))}
         </Switch>
       </QueryClientProvider>

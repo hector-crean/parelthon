@@ -122,7 +122,7 @@ export const Label = ({ comment, currentTime, arrowLayout }: LabelProps) => {
             <motion.div
               layout
               className={styles.label_content}
-              data-isOpen={isOpen}
+              data-open={isOpen}
               data-arrow-layout={layout}
             >
               <div>

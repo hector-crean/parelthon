@@ -1,12 +1,22 @@
 import { getVideoWithCommentsByVideoId } from "@/api/comments";
-import { CommentThread } from "@/component/CommentThread";
 import { QueryResult } from "@/component/QueryResult";
 import { VideoPlayer, VideoPlayerMode } from "@/component/VideoPlayer";
+import { AudioGraph } from "@/component/audio-graph/AudioGraph";
 import { VideoLayout } from "@/layouts/VideoLayout";
+import { audiosExample } from "@/models/audio";
 import { RoutePath } from "@/routes";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { create } from "zustand";
+
+function wrappedArrayLookup<T>(arr: T[], index: number): T {
+  const length = arr.length;
+
+  // Wrap around the index if it's out of bounds
+  const wrappedIndex = ((index % length) + length) % length;
+
+  return arr[wrappedIndex];
+}
 
 interface VideoPageStore {
   activeCommentIds: Array<string>;
@@ -31,14 +41,15 @@ const useVideoPageStore = create<VideoPageStore>()((set) => ({
 ////
 
 const VideoPage = () => {
-  const videoPageStore = useVideoPageStore();
-
+  //Query for video, contingent on the video_id
   const [_isRoute, params] = useRoute("/videos/:video_id" satisfies RoutePath);
   const [_location, setLocation] = useLocation();
 
   if (!params) return null;
 
   const videoId = params.video_id;
+
+  const videoPageStore = useVideoPageStore();
 
   const getVideoWithCommentsQuery = useQuery({
     queryKey: [`video:${videoId}`],
@@ -47,32 +58,34 @@ const VideoPage = () => {
 
   return (
     <QueryResult queryResult={getVideoWithCommentsQuery}>
-      {({ data: { video, comments } }) => (
-        <VideoLayout
-          video={
-            <VideoPlayer
-              videoPayload={video}
-              mode={VideoPlayerMode.Editor}
-              videoComments={comments}
-              changeVideo={(videoId: string) =>
-                setLocation(`/videos/${videoId}`)
-              }
-            />
-          }
-          sidebar={
-            <CommentThread
-              comments={comments}
-              timeActiveCommentIds={videoPageStore.activeCommentIds}
-            />
-          }
-          expandingFooter={
-            <section id="video-overview">
-              <h1>{video.title}</h1>
-              <h2>{video.created_at}</h2>
-            </section>
-          }
-        />
-      )}
+      {({ data: { video, comments, videos } }) => {
+        const videoIdx = videos.findIndex((v) => v.video_id === video.video_id);
+
+        return (
+          <VideoLayout
+            video={
+              <VideoPlayer
+                videoPayload={video}
+                mode={VideoPlayerMode.Editor}
+                videoComments={comments}
+                changeVideo={(videoId: string) =>
+                  setLocation(`/videos/${videoId}`)
+                }
+                soundtrack={audiosExample}
+                nextVideo={wrappedArrayLookup(videos, videoIdx + 1)}
+                prevVideo={wrappedArrayLookup(videos, videoIdx - 1)}
+              />
+            }
+            sidebar={<AudioGraph initial_edges={[]} initial_nodes={[]} />}
+            expandingFooter={
+              <section id="video-overview">
+                <h1>{video.title}</h1>
+                <h2>{video.created_at}</h2>
+              </section>
+            }
+          />
+        );
+      }}
     </QueryResult>
   );
 };

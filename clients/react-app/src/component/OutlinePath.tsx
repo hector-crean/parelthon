@@ -66,11 +66,11 @@ const OutlinePath = ({
             gradientUnits="userSpaceOnUse"
             gradientTransform="translate(491.25,402)"
           >
-            <stop offset="0" stop-color="white" stop-opacity="0"></stop>
-            <stop offset="0.25" stop-color="white" stop-opacity="0.7"></stop>
-            <stop offset="0.5" stop-color="white" stop-opacity="0"></stop>
-            <stop offset="0.75" stop-color="white" stop-opacity="0.7"></stop>
-            <stop offset="1" stop-color="white" stop-opacity="0"></stop>
+            <stop offset="0" stopColor="white" stopOpacity="0"></stop>
+            <stop offset="0.25" stopColor="white" stopOpacity="0.7"></stop>
+            <stop offset="0.5" stopColor="white" stopOpacity="0"></stop>
+            <stop offset="0.75" stopColor="white" stopOpacity="0.7"></stop>
+            <stop offset="1" stopColor="white" stopOpacity="0"></stop>
             <animateTransform
               attributeName="gradientTransform"
               attributeType="XML"
@@ -95,19 +95,19 @@ const OutlinePath = ({
               dx="0"
               dy="0"
               stdDeviation="2"
-              flood-color="#1d85bb"
+              floodColor="#1d85bb"
             ></feDropShadow>
             <feDropShadow
               dx="0"
               dy="0"
               stdDeviation="4"
-              flood-color="#1d85bb"
+              floodColor="#1d85bb"
             ></feDropShadow>
             <feDropShadow
               dx="0"
               dy="0"
               stdDeviation="6"
-              flood-color="#1d85bb"
+              floodColor="#1d85bb"
             ></feDropShadow>
           </filter>
 

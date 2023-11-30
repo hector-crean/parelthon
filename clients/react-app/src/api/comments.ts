@@ -25,20 +25,30 @@ const getCommentsByVideoId = async (videoId: string): Promise<Array<VideoComment
     return response.json();
 };
 
-const getVideoWithCommentsByVideoId = async (videoId: string): Promise<{ video: Video, comments: Array<VideoComment> }> => {
-    const commentResp = await fetch(`${API_BASE_URL}/videos/${videoId}/comments`, {
+const getVideoWithCommentsByVideoId = async (videoId: string): Promise<{ video: Video, comments: Array<VideoComment>, videos: Array<Video> }> => {
+    const commentByVideoIdResp = await fetch(`${API_BASE_URL}/videos/${videoId}/comments`, {
         method: 'GET',
     });
-    const videoResp = await fetch(`${API_BASE_URL}/videos/${videoId}`, {
+    const videoByVideoIdResp = await fetch(`${API_BASE_URL}/videos/${videoId}`, {
         method: 'GET',
     });
 
-    const video = await videoResp.json();
-    const comments = await commentResp.json();
+    const videosResp = await fetch(`${API_BASE_URL}/videos`, {
+        method: 'GET',
+    });
+
+
+    const video = await videoByVideoIdResp.json();
+    const comments = await commentByVideoIdResp.json();
+    const videos = await videosResp.json()
+
+
+
 
     return {
         video: video,
-        comments: comments
+        comments: comments,
+        videos: videos,
     }
 };
 

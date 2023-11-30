@@ -3,7 +3,6 @@ import { CreateVideoFromFile, Video } from '../models/video';
 
 const createVideo = async (createVideoPayload: CreateVideoFromFile): Promise<Video> => {
 
-    console.log(createVideoPayload)
     try {
 
         const formData = new FormData();
@@ -75,3 +74,4 @@ const getVideoById = async (videoId: string): Promise<Video> => {
 };
 
 export { createVideo, getVideoById, getVideos };
+

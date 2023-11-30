@@ -31,7 +31,10 @@ const CommentThread = ({
       }}
     >
       {comments.map((comment) => (
-        <Accordion.Item value={comment.comment_id}>
+        <Accordion.Item
+          value={comment.comment_id}
+          key={`${comment.comment_id}`}
+        >
           <Accordion.Control>{comment.comment_id}</Accordion.Control>
           <Accordion.Panel>panel-1</Accordion.Panel>
         </Accordion.Item>
