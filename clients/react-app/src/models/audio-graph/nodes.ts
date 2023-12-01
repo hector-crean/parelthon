@@ -18,7 +18,7 @@ export type OscillatorNodeAttributes = { type: 'oscillator-node', data: Oscillat
 export type PannerNodeAttributes = { type: 'panner-node', data: PannerOptions }
 export type StereoPannerNodeAttributes = { type: 'stereo-panner-node', data: StereoPannerOptions }
 export type WaveShaperNodeAttributes = { type: 'wave-shaper-node', data: WaveShaperOptions }
-export type OuputNodeAttributes = { type: 'output', data: {} }
+export type OuputNodeAttributes = { type: 'output-node', data: unknown }
 
 type AudioNodeAttributes =
     | AnalyserNodeAttributes
@@ -42,13 +42,14 @@ type AudioNodeAttributes =
 
 
 
-type ExtractTypeAndData<T> = T extends { type: infer Type; data: infer Data } ? Type extends string ? Node<Data, Type> : never : never;
+type ExtractTypeAndData<T> = T extends { type: infer Type; data: infer Data } ? Type extends string ? Node<Data> : never : never;
+
 
 
 type AudioGraphNode = ExtractTypeAndData<AudioNodeAttributes>
 
 
-export type { AudioGraphNode, AudioNodeAttributes }
+export type { AudioGraphNode, AudioNodeAttributes, }
 
 
 

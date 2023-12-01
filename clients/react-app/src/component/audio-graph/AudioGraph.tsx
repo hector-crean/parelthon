@@ -1,47 +1,41 @@
-import { AudioGraphEdge } from "@/models/audio-graph/edges";
-import { AudioGraphNode } from "@/models/audio-graph/nodes";
-import { ComponentType, useCallback, useMemo, useState } from "react";
+import { AudioGraphEdgeAttributes } from "@/models/audio-graph/edges";
+import { AudioNodeAttributes } from "@/models/audio-graph/nodes";
+import { ComponentType, useMemo } from "react";
 import {
   Background,
   BackgroundVariant,
   EdgeProps,
   NodeProps,
-  OnConnect,
-  OnEdgesChange,
-  OnNodesChange,
   ReactFlow,
   ReactFlowInstance,
-  Edge as RfEdge,
-  Node as RfNode,
-  addEdge,
-  applyEdgeChanges,
-  applyNodeChanges,
 } from "reactflow";
 import "reactflow/dist/style.css";
+import { useAudioStore } from "./audioStore";
 import { ProgressEdgeView } from "./edges/progress-edge";
+import { GainNode } from "./nodes/GainNode";
 import { OscillatorNodeView } from "./nodes/OscillatorNode";
+import { OutputNode } from "./nodes/OutNode";
 
 type NodeLibrary = {
-  [key in AudioGraphNode["type"]]?: ComponentType<NodeProps>;
+  [key in AudioNodeAttributes["type"]]?: ComponentType<NodeProps>;
 };
 
 type EdgeLibrary = {
-  [key in AudioGraphEdge["type"]]?: ComponentType<EdgeProps>;
+  [key in AudioGraphEdgeAttributes["type"]]?: ComponentType<EdgeProps>;
 };
 
 const onInit = (reactFlowInstance: ReactFlowInstance) => {
   console.log("flow loaded:", reactFlowInstance);
 };
 
-interface AudioGraphProps {
-  initial_nodes: Array<RfNode>;
-  initial_edges: Array<RfEdge>;
-}
+interface AudioGraphProps {}
 
-const AudioGraph = ({ initial_edges, initial_nodes }: AudioGraphProps) => {
+const AudioGraph = ({}: AudioGraphProps) => {
   const nodeTypes: NodeLibrary = useMemo(
     () => ({
       "oscillator-node": OscillatorNodeView,
+      "output-node": OutputNode,
+      "gain-node": GainNode,
     }),
     []
   );
@@ -53,21 +47,10 @@ const AudioGraph = ({ initial_edges, initial_nodes }: AudioGraphProps) => {
     []
   );
 
-  const [nodes, setNodes] = useState(initial_nodes);
-  const [edges, setEdges] = useState(initial_edges);
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect } =
+    useAudioStore();
 
-  const onNodesChange: OnNodesChange = useCallback(
-    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-    [setNodes]
-  );
-  const onEdgesChange: OnEdgesChange = useCallback(
-    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
-    [setEdges]
-  );
-  const onConnect: OnConnect = useCallback(
-    (connection) => setEdges((eds) => addEdge(connection, eds)),
-    [setEdges]
-  );
+  console.log(edges);
 
   return (
     <ReactFlow

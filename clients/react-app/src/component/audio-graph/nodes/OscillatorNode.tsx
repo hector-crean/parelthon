@@ -1,15 +1,14 @@
 import { OscillatorNodeAttributes } from "@/models/audio-graph/nodes";
 import { ChangeEvent } from "react";
 import { Handle, NodeProps, Position } from "reactflow";
-import { shallow } from "zustand/shallow";
-import { useAudioStore } from "../audioStore";
+import { AudioStore, useAudioStore } from "../audioStore";
 
 interface Props extends NodeProps<OscillatorNodeAttributes["data"]> {
   id: string;
   isConnectable: boolean;
 }
 
-const selector = (id: string) => (store: typeof useAudioStore) => ({
+const selector = (id: string) => (store: AudioStore) => ({
   setFrequency: (e: ChangeEvent<HTMLInputElement>) =>
     store.updateNode(id, { frequency: +e.target.value }),
   setType: (e: ChangeEvent<HTMLInputElement>) =>
@@ -17,7 +16,7 @@ const selector = (id: string) => (store: typeof useAudioStore) => ({
 });
 
 const OscillatorNodeView = ({ id, data, isConnectable }: Props) => {
-  const { setFrequency, setType } = useAudioStore(selector(id), shallow);
+  const { setFrequency, setType } = useAudioStore(selector(id));
 
   return (
     <div style={{ width: `${100}px`, backgroundColor: "grey" }}>
@@ -35,8 +34,8 @@ const OscillatorNodeView = ({ id, data, isConnectable }: Props) => {
         onConnect={(params) => console.log("handle onConnect", params)}
       />
 
-      <label className={tw("flex flex-col px-2 py-1")}>
-        <p className={tw("text-xs font-bold mb-2")}>Frequency</p>
+      <label>
+        <p>Frequency</p>
         <input
           className="nodrag"
           type="range"
@@ -45,7 +44,7 @@ const OscillatorNodeView = ({ id, data, isConnectable }: Props) => {
           value={data.frequency}
           onChange={setFrequency}
         />
-        <p className={tw("text-right text-xs")}>{data.frequency} Hz</p>
+        <p>{data.frequency} Hz</p>
       </label>
     </div>
   );

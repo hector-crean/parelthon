@@ -21,7 +21,6 @@ import { CanvasMode, CanvasState } from "@/types";
 import { captureVideoFrame } from "@/utils/frame-extractor";
 import { IconPlayerPause, IconPlayerPlay } from "@tabler/icons-react";
 import { throttle } from "lodash";
-import { AudioTrack } from "./AudioTrack";
 import { Frame } from "./Frame";
 import { OutlinePath } from "./OutlinePath";
 import ToolsBar from "./ToolsBar";
@@ -211,14 +210,6 @@ const VideoPlayer = ({
                       <CursorTooltip position={cursorTooltipPosition}>
                         {isPlaying ? "click to comment" : "click to resume"}
                       </CursorTooltip>
-
-                      {soundtrack.map((audio) => (
-                        <AudioTrack
-                          key={`${audio.src}-${audio.iv.start}-${audio.iv.end}`}
-                          absoluteTime={currentTime}
-                          track={audio}
-                        />
-                      ))}
 
                       {/* Video player */}
                       <video

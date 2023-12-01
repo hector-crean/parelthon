@@ -7,11 +7,11 @@ const audioCtx = new AudioContext();
 
 const serialisableDag: DirectedGraph<AudioNodeAttributes> = new DirectedGraph()
 
-const dag: DirectedGraph<AudioNode> = initAudioGraph(audioCtx, serialisableDag)
+export const runtimeDag: DirectedGraph<AudioNode> = initAudioGraph(audioCtx, serialisableDag)
 
 audioCtx.suspend();
 
-dag.addNode('output', audioCtx.destination);
+runtimeDag.addNode('output', audioCtx.destination);
 
 
 export function audioIsRunning() {
@@ -26,29 +26,30 @@ export function toggleAudio() {
 
 export const addAudioNode = (/*ctx: AudioContext,*/ /*dag: DirectedGraph<AudioNode>,*/ id: string, attributes: AudioNodeAttributes) => {
     const node = createAudioNode(audioCtx, attributes)
-    dag.addNode(id, node)
+    runtimeDag.addNode(id, node)
 }
 
-export const updateAudioNode = (/*ctx: AudioContext,*/ /*dag: DirectedGraph<AudioNode>,*/ id: string, attributes: AudioNodeAttributes) => {
+export const updateAudioNode = (/*ctx: AudioContext,*/ /*dag: DirectedGraph<AudioNode>,*/ id: string, attributes: AudioNodeAttributes['data']) => {
 
-    dag.updateAttributes(attrs => {
+    const node = runtimeDag.findNode((nodeId) => nodeId == id);
+    runtimeDag.updateNodeAttributes(node, attrs => {
         return ({ ...attrs, attributes })
     })
 }
 
 export const removeAudioNode = (id: string) => {
 
-    const node = dag.getNodeAttributes(id);
+    const node = runtimeDag.getNodeAttributes(id);
     node.disconnect();
 
-    dag.dropNode(id);
+    runtimeDag.dropNode(id);
 }
 
 export const disconnect = (sourceId: string, targetId: string) => {
 
 
-    const sourceNode = dag.getNodeAttributes(sourceId);
-    const targetNode = dag.getNodeAttributes(targetId);
+    const sourceNode = runtimeDag.getNodeAttributes(sourceId);
+    const targetNode = runtimeDag.getNodeAttributes(targetId);
 
     //disconnect in dag
 
@@ -61,8 +62,8 @@ export const disconnect = (sourceId: string, targetId: string) => {
 export const connect = (sourceId: string, targetId: string) => {
 
 
-    const sourceNode = dag.getNodeAttributes(sourceId);
-    const targetNode = dag.getNodeAttributes(targetId);
+    const sourceNode = runtimeDag.getNodeAttributes(sourceId);
+    const targetNode = runtimeDag.getNodeAttributes(targetId);
 
     //disconnect in dag
 
