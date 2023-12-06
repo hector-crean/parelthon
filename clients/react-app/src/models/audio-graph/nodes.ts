@@ -1,55 +1,53 @@
 // import type { GraphNode } from "@/models/graph";
-import { type Node } from 'reactflow'
 
-export type AnalyserNodeAttributes = { type: 'analyser-node', data: AnalyserOptions }
-export type AudioBufferSourceNodeAttributes = { type: 'audio-buffer-source-node', data: AudioBufferSourceOptions }
-export type BiquadFilterNodeAttributes = { type: 'biquad-filter-node', data: BiquadFilterOptions }
-export type ChannelMergeNodeAttributes = { type: 'channel-merge-node', data: ChannelMergerOptions }
-export type ChannelSplitterNodeAttributes = { type: 'channel-splitter-node', data: ChannelSplitterOptions }
-export type ContanceSourceNodeAttributes = { type: 'constance-source-node', data: ConstantSourceOptions }
-export type ConvolverNodeAttributes = { type: 'convolver-node', data: ConvolverOptions }
-export type DelayNodeAttributes = { type: 'delay-node', data: DelayOptions }
-export type DynamicCompressorNodeAttributes = { type: 'dynamic-compressor-node', data: DynamicsCompressorOptions }
-export type GainNodeAttributes = { type: 'gain-node', data: GainOptions }
-export type IifFilterNodeAttributes = { type: 'iir-filter-node', data: IIRFilterOptions }
-export type MediaElementSourceNodeAttributes = { type: 'media-element-source-node', data: MediaElementAudioSourceOptions }
-export type MediaStreamSourceNodeAttributes = { type: 'media-stream-source', data: MediaStreamAudioSourceOptions }
-export type OscillatorNodeAttributes = { type: 'oscillator-node', data: OscillatorOptions }
-export type PannerNodeAttributes = { type: 'panner-node', data: PannerOptions }
-export type StereoPannerNodeAttributes = { type: 'stereo-panner-node', data: StereoPannerOptions }
-export type WaveShaperNodeAttributes = { type: 'wave-shaper-node', data: WaveShaperOptions }
-export type OuputNodeAttributes = { type: 'output-node', data: unknown }
 
-type AudioNodeAttributes =
+export type GainNodeAttributes = { type: 'gain-node', params: GainOptions, }
+export type AnalyserNodeAttributes = { type: 'analyser-node', params: AnalyserOptions, }
+export type AudioBufferSourceNodeAttributes = { type: 'audio-buffer-source-node', params: AudioBufferSourceOptions, }
+export type OscillatorNodeAttributes = { type: 'oscillator-node', params: OscillatorOptions, }
+
+
+// export type BiquadFilterNodeAttributes = { type: 'biquad-filter-node', params: BiquadFilterOptions, instance: BiquadFilterNode }
+// export type ChannelMergeNodeAttributes = { type: 'channel-merge-node', params: ChannelMergerOptions, instance: ChannelMergerNode }
+// export type ChannelSplitterNodeAttributes = { type: 'channel-splitter-node', params: ChannelSplitterOptions, instance: ChannelSplitterNode }
+// export type ContanceSourceNodeAttributes = { type: 'constance-source-node', params: ConstantSourceOptions, instance:  }
+// export type ConvolverNodeAttributes = { type: 'convolver-node', params: ConvolverOptions }
+// export type DelayNodeAttributes = { type: 'delay-node', params: DelayOptions }
+// export type DynamicCompressorNodeAttributes = { type: 'dynamic-compressor-node', params: DynamicsCompressorOptions }
+// export type IifFilterNodeAttributes = { type: 'iir-filter-node', params: IIRFilterOptions }
+// export type MediaElementSourceNodeAttributes = { type: 'media-element-source-node', params: MediaElementAudioSourceOptions }
+// export type MediaStreamSourceNodeAttributes = { type: 'media-stream-source', params: MediaStreamAudioSourceOptions }
+// export type PannerNodeAttributes = { type: 'panner-node', params: PannerOptions }
+// export type StereoPannerNodeAttributes = { type: 'stereo-panner-node', params: StereoPannerOptions }
+// export type WaveShaperNodeAttributes = { type: 'wave-shaper-node', params: WaveShaperOptions }
+// export type OuputNodeAttributes = { type: 'output-node', params: AudioBufferSourceOptions }
+
+type AudioNodeADT =
     | AnalyserNodeAttributes
     | AudioBufferSourceNodeAttributes
-    | BiquadFilterNodeAttributes
-    | ChannelMergeNodeAttributes
-    | ChannelSplitterNodeAttributes
-    | ContanceSourceNodeAttributes
-    | ConvolverNodeAttributes
-    | DelayNodeAttributes
-    | DynamicCompressorNodeAttributes
     | GainNodeAttributes
-    | IifFilterNodeAttributes
-    | MediaElementSourceNodeAttributes
-    | MediaStreamSourceNodeAttributes
     | OscillatorNodeAttributes
-    | PannerNodeAttributes
-    | StereoPannerNodeAttributes
-    | WaveShaperNodeAttributes
-    | OuputNodeAttributes
+// | BiquadFilterNodeAttributes
+// | ChannelMergeNodeAttributes
+// | ChannelSplitterNodeAttributes
+// | ContanceSourceNodeAttributes
+// | ConvolverNodeAttributes
+// | DelayNodeAttributes
+// | DynamicCompressorNodeAttributes
+// | IifFilterNodeAttributes
+// | MediaElementSourceNodeAttributes
+// | MediaStreamSourceNodeAttributes
+// | PannerNodeAttributes
+// | StereoPannerNodeAttributes
+// | WaveShaperNodeAttributes
+// | OuputNodeAttributes
 
 
-
-type ExtractTypeAndData<T> = T extends { type: infer Type; data: infer Data } ? Type extends string ? Node<Data> : never : never;
-
-
-
-type AudioGraphNode = ExtractTypeAndData<AudioNodeAttributes>
+type AudioNodeParams = AudioNodeADT['params']
+type AudioNodeInstance = AudioNodeADT['instance']
 
 
-export type { AudioGraphNode, AudioNodeAttributes, }
+export type { AudioNodeParams, AudioNodeADT, AudioNodeInstance }
 
 
 

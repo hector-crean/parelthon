@@ -1,5 +1,5 @@
-import { AudioGraphEdgeAttributes } from "@/models/audio-graph/edges";
-import { AudioNodeAttributes } from "@/models/audio-graph/nodes";
+import { AudioGraphEdgeADT } from "@/models/audio-graph/edges";
+import { AudioNodeADT } from "@/models/audio-graph/nodes";
 import { ComponentType, useMemo } from "react";
 import {
   Background,
@@ -17,11 +17,11 @@ import { OscillatorNodeView } from "./nodes/OscillatorNode";
 import { OutputNode } from "./nodes/OutNode";
 
 type NodeLibrary = {
-  [key in AudioNodeAttributes["type"]]?: ComponentType<NodeProps>;
+  [key in AudioNodeADT["type"]]?: ComponentType<NodeProps>;
 };
 
 type EdgeLibrary = {
-  [key in AudioGraphEdgeAttributes["type"]]?: ComponentType<EdgeProps>;
+  [key in AudioGraphEdgeADT["type"]]?: ComponentType<EdgeProps>;
 };
 
 const onInit = (reactFlowInstance: ReactFlowInstance) => {
@@ -49,8 +49,6 @@ const AudioGraph = ({}: AudioGraphProps) => {
 
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } =
     useAudioStore();
-
-  console.log(edges);
 
   return (
     <ReactFlow

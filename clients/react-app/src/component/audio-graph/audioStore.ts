@@ -1,25 +1,26 @@
 //https://codesandbox.io/p/sandbox/old-morning-pj3k7y?file=%2Fstore.js%3A25%2C2-29%2C5
-import { AudioGraphEdge } from '@/models/audio-graph/edges';
-import { AudioGraphNode, AudioNodeAttributes } from '@/models/audio-graph/nodes';
-import { Connection, EdgeChange, OnConnect, OnEdgesChange, OnNodesChange, addEdge, applyEdgeChanges, applyNodeChanges, type NodeChange } from 'reactflow';
+import { AudioEdgeADT } from '@/models/audio-graph/edges';
+import { AudioNodeADT } from '@/models/audio-graph/nodes';
+import { Connection, Edge, EdgeChange, Node, OnConnect, OnEdgesChange, OnNodesChange, addEdge, applyEdgeChanges, applyNodeChanges, type NodeChange } from 'reactflow';
+import { Entries } from 'type-fest';
 import { create } from 'zustand';
 import {
     audioIsRunning,
-    connect,
-    updateAudioNode
+    connect
 } from './audio';
 
 
 interface AudioStore {
     ctx: AudioContext,
     isRunning: boolean,
-    nodes: AudioGraphNode[],
-    edges: AudioGraphEdge[],
+    nodes: Node<AudioNodeADT['params']>[],
+    edges: Edge<AudioEdgeADT['params']>[],
+    nodeInstances: Map<string, AudioNodeADT['instance']>;
     toggleAudio: () => void;
     onNodesChange: OnNodesChange,
     onEdgesChange: OnEdgesChange,
     onConnect: OnConnect,
-    updateNode(id: string, data: AudioNodeAttributes['data']): void
+    updateAudioParam(id: string, data: AudioNodeADT['params']): void
 }
 
 const useAudioStoreFactory = (ctx: AudioContext) => create<AudioStore>()(
@@ -32,8 +33,8 @@ const useAudioStoreFactory = (ctx: AudioContext) => create<AudioStore>()(
                 isRunning: ctx.state === 'running',
                 nodes: [
                     { id: 'output-node', type: 'output-node', position: { x: 0, y: 0 }, data: {} },
-                    { id: 'oscillator-node-1', type: 'oscillator-node', position: { x: 1, y: 0 }, data: new OscillatorNode(ctx) },
-                    { id: 'gain-node-1', type: 'gain-node', position: { x: 3, y: 0 }, data: new GainNode(ctx) }
+                    { id: 'oscillator-node-1', type: 'oscillator-node', position: { x: 1, y: 0 }, data: {} },
+                    { id: 'gain-node-1', type: 'gain-node', position: { x: 3, y: 0 }, data: {} }
 
 
                 ],
@@ -51,6 +52,7 @@ const useAudioStoreFactory = (ctx: AudioContext) => create<AudioStore>()(
                         set({ isRunning: audioIsRunning() });
                     });
                 },
+                //This is more with regards to position 
                 onNodesChange(changes: NodeChange[]) {
                     set(({ nodes }) => ({ nodes: applyNodeChanges(changes, nodes) }));
                 },
@@ -66,18 +68,41 @@ const useAudioStoreFactory = (ctx: AudioContext) => create<AudioStore>()(
                     }
 
                 },
-                updateNode(id: string, attributes: AudioNodeAttributes) {
-                    updateAudioNode(id, attributes)
-                    set(({ nodes }) => ({
-                        nodes: nodes.map((node) =>
-                            node.id === id ? { ...node, data: Object.assign(node, attributes.data) } : node
-                        ),
-                    }))
-                },
+                updateAudioParam(id: string, data: AudioNodeADT['params']) {
+                    const nodeInstance = get().nodeInstances.get(id);
+
+                    if (nodeInstance) {
+                        updateAudioNode(nodeInstance, data);
+                        set({
+                            nodes: get().nodes.map((node) =>
+                                node.id === id ? { ...node, data: Object.assign(node.data, data) } : node
+                            ),
+                        });
+                    }
+
+
+
+
+                }
             }
         )
     }
 );
+
+
+export function updateAudioNode(nodeInstance: AudioNodeADT['instance'], data: AudioNodeADT['params']) {
+
+    const entries = Object.entries(data) as Entries<typeof data>;
+
+    for (const [key, val] of entries) {
+
+        if (nodeInstance[key]) {
+            node[key].value = val;
+        } else {
+            node[key] = val;
+        }
+    }
+}
 
 
 

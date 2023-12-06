@@ -17,7 +17,6 @@ const createVideo = async (createVideoPayload: CreateVideoFromFile): Promise<Vid
             body: formData
         });
 
-        console.log(response)
 
         if (!response.ok) {
             // Handle non-successful response (e.g., 4xx or 5xx status codes)

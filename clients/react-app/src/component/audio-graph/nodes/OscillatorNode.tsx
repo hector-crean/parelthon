@@ -1,9 +1,8 @@
-import { OscillatorNodeAttributes } from "@/models/audio-graph/nodes";
 import { ChangeEvent } from "react";
 import { Handle, NodeProps, Position } from "reactflow";
 import { AudioStore, useAudioStore } from "../audioStore";
 
-interface Props extends NodeProps<OscillatorNodeAttributes["data"]> {
+interface Props extends NodeProps<OscillatorNode> {
   id: string;
   isConnectable: boolean;
 }
@@ -41,10 +40,10 @@ const OscillatorNodeView = ({ id, data, isConnectable }: Props) => {
           type="range"
           min="10"
           max="1000"
-          value={data.frequency}
+          value={data.frequency.value}
           onChange={setFrequency}
         />
-        <p>{data.frequency} Hz</p>
+        <p>{data.frequency.value} Hz</p>
       </label>
     </div>
   );

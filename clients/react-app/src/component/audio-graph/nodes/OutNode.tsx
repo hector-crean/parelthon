@@ -1,4 +1,3 @@
-import { OuputNodeAttributes } from "@/models/audio-graph/nodes";
 import { Handle, NodeProps, Position } from "reactflow";
 import { useAudioStore, type AudioStore } from "../audioStore";
 
@@ -7,7 +6,7 @@ const selector = (store: AudioStore) => ({
   toggleAudio: store.toggleAudio,
 });
 
-interface Props extends NodeProps<OuputNodeAttributes["data"]> {
+interface Props extends NodeProps<{}> {
   id: string;
 }
 

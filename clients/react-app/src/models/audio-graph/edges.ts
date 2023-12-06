@@ -1,17 +1,16 @@
-import { Edge } from "reactflow";
 import { Progress } from "../progress";
 
 
 // Edge types
 // type ProgressionEdge = GraphEdge<string, 'directed', 'progress-edge', Progress>
 
-type ProgressionEdgeAttr = { type: 'progress-edge', data: Progress }
+type ProgressionEdgeAttributes = { type: 'progress-edge', params: Progress }
 
-type AudioGraphEdgeAttributes = ProgressionEdgeAttr
+type AudioEdgeADT = ProgressionEdgeAttributes
 
-type ExtractTypeAndData<T> = T extends { type: infer Type; data: infer Data } ? Type extends string ? Edge<Data> : never : never;
+// type ExtractTypeAndData<T> = T extends { type: infer Type; data: infer Data } ? Type extends string ? Edge<Data> : never : never;
 
-type AudioGraphEdge = ExtractTypeAndData<AudioGraphEdgeAttributes>
+// type AudioGraphEdge = ExtractTypeAndData<AudioGraphEdgeAttributes>
 
-export type { AudioGraphEdge, AudioGraphEdgeAttributes };
+export type { AudioEdgeADT };
 

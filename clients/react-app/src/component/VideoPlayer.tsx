@@ -15,7 +15,6 @@ import {
   useState,
 } from "react";
 
-import { useAudioStore } from "@/component/AudioTrack";
 import { Audio } from "@/models/audio";
 import { CanvasMode, CanvasState } from "@/types";
 import { captureVideoFrame } from "@/utils/frame-extractor";
@@ -55,7 +54,6 @@ const VideoPlayer = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   //state
-  const audioStore = useAudioStore();
   const [comments, setComments] = useState<Array<VideoComment>>(videoComments);
   const [[aw, ah], setAspectRatio] = useState<[number, number]>([16, 9]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -87,7 +85,6 @@ const VideoPlayer = ({
       // Get the intrinsic width and height of the video
       const intrinsicWidth = videoRef.current.videoWidth;
       const intrinsicHeight = videoRef.current.videoHeight;
-      console.log(intrinsicWidth, intrinsicHeight);
       setAspectRatio([intrinsicWidth, intrinsicHeight]);
     }
   }, [videoRef.current]);
@@ -225,16 +222,11 @@ const VideoPlayer = ({
                         onCanPlay={handleReadyToPlay}
                         onPointerMove={handlePointerMove}
                         onPointerLeave={handlePointerLeave}
-                        onPause={() => {
-                          audioStore.mute();
-                        }}
-                        onPlay={() => {
-                          audioStore.unmute();
-                        }}
+                        onPause={() => {}}
+                        onPlay={() => {}}
                         muted={isMuted}
                         src={videoPayload.s3_url}
                         onEnded={() => {
-                          audioStore.mute();
                           changeVideo(nextVideo.video_id);
                         }}
                       />
