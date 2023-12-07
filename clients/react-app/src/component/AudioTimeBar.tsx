@@ -1,5 +1,8 @@
+import { Audio } from "@/models/audio";
 import { Slider, rem } from "@mantine/core";
-import { IconPlayerPause, IconPlayerPlay } from "@tabler/icons-react";
+import styles from './AudioTimeBar.module.css';
+import { AudioTrack } from "./AudioTrack";
+
 
 interface Props {
   duration: number;
@@ -8,9 +11,14 @@ interface Props {
   handleSliderCommit: (time: number) => void;
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
+  isSeeking: boolean
+  audioTracks: Array<Audio>
 }
 
-const renderAudioTimeBar = (props: Props) => {
+const AudioTimeBar = (props: Props) => {
+
+
+
   const {
     isPlaying,
     duration,
@@ -18,9 +26,11 @@ const renderAudioTimeBar = (props: Props) => {
     handleSliderChange,
     handleSliderCommit,
     setIsPlaying,
+    audioTracks,
+    isSeeking
   } = props;
 
-  console.log(duration);
+
 
   // const draw = useCallback(() => {}, []);
 
@@ -34,35 +44,53 @@ const renderAudioTimeBar = (props: Props) => {
   // useAnimationFrame(tick);
 
   return (
-    <form style={{ width: "100%", height: "100px" }}>
+    <div className={styles.container}>
+      {audioTracks.map((track, i) => (
+        <AudioTrack
+          isSeeking={isSeeking}
+          key={`${track.id}-${i}-${track.src}`}
+          videoTime={time}
+          videoDuration={duration}
+          track={track}
+          isPlaying={isPlaying}
+          muted={false}
+        />
+      ))}
       <Slider
-        styles={{
+        styles={(theme) => ({
           root: {
-            position: "absolute",
-            bottom: "20px",
             width: "100%",
-            height: "max-content",
+            position: 'absolute',
+            bottom: '50%',
+            transform: 'translate(0, 50%)',
+            left: 0,
+            right: 0,
             pointerEvents: "all",
           },
-          // label: {},
-          thumb: {
-            borderWidth: rem(2),
-            padding: rem(3),
-          },
-          trackContainer: {
-            backgroundColor: "transparent",
-          },
-          track: {
-            backgroundColor: "transparent",
-          },
-          bar: {
-            backgroundColor: "transparent",
-          },
 
-          // markWrapper: {},
-          // mark: {},
-          // markLabel: {}
-        }}
+          track: {
+            backgroundColor: theme.colors.dark[3],
+            height: rem(2),
+          },
+          mark: {
+            width: 6,
+            height: 6,
+            borderRadius: 6,
+            transform: 'translateX(-3px) translateY(-2px)',
+            borderColor: theme.colors.dark[3],
+          },
+          markFilled: {
+            borderColor: theme.colors.blue[6],
+          },
+          markLabel: { fontSize: theme.fontSizes.xs, marginBottom: 5, marginTop: 0 },
+          thumb: {
+            height: rem(2),
+            width: rem(2),
+            backgroundColor: theme.white,
+            borderWidth: 1,
+            boxShadow: theme.shadows.sm,
+          },
+        })}
         thumbSize={rem(25)}
         min={0}
         max={duration}
@@ -71,19 +99,19 @@ const renderAudioTimeBar = (props: Props) => {
         step={0.1}
         onChange={handleSliderChange}
         onChangeEnd={handleSliderCommit}
-        // marks={comments.map(c => ({ value: c.start_time, label: c.comment_id }))}
-        thumbChildren={
-          isPlaying ? (
-            <IconPlayerPause size={rem(1)} />
-          ) : (
-            <IconPlayerPlay size={rem(1)} />
-          )
-        }
+      // marks={comments.map(c => ({ value: c.start_time, label: c.comment_id }))}
+      // thumbChildren={
+      //   isPlaying ? (
+      //     <IconPlayerPause size={rem(1)} />
+      //   ) : (
+      //     <IconPlayerPlay size={rem(1)} />
+      //   )
+      // }
       />
-    </form>
+    </div>
+
   );
 };
 
-const AudioTimeBar = renderAudioTimeBar;
 
 export { AudioTimeBar };

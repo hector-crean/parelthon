@@ -1,9 +1,15 @@
+import { useAudioNode } from "@/hooks/nodes";
 import { Audio } from "@/models/audio";
 import { Interval } from "@/models/interval";
+import { motion } from 'framer-motion';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import * as sac from 'standardized-audio-context';
+import { useAudioContextContext } from "./Audio";
+import styles from './AudioTrack.module.css';
+import { FftDomain, Visualiser } from "./audio-nodes/Analyser/Visualiser";
 
-import { Howl } from "howler";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+
 
 interface AudioTrackProps {
   isPlaying: boolean;
@@ -11,7 +17,8 @@ interface AudioTrackProps {
   muted: boolean;
   track: Audio;
   //this is the master time (i.e. that of the video)
-  time: number;
+  videoTime: number;
+  videoDuration: number
 }
 
 export const AudioTrack = ({
@@ -19,63 +26,107 @@ export const AudioTrack = ({
   isSeeking,
   muted,
   track: { iv, src, id },
-  time,
+  videoTime,
+  videoDuration
 }: AudioTrackProps) => {
-  const soundRef = useRef<Howl>();
 
-  const inInterval = useMemo(
-    () => intervalPredicateFn(time, iv),
-    [time, iv.start, iv.end]
+  const [audioIsPlaying, setAudioIsPlaying] = useState(false);
+  const audioContext = useAudioContextContext();
+  const [audioBuf, setAudioBuf] = useState<sac.AudioBuffer | null>(null);
+  const bufferSourceNodeRef = useRef<sac.AudioBufferSourceNode<sac.AudioContext> | null>(null);
+  const gainNode = useAudioNode('gain-node', context => context.createGain(), [src]);
+  const analyserNode = useAudioNode('analyser-node', context => context.createAnalyser(), [src]);
+
+  // Combine fetching and decoding audio into a separate function
+  useEffect(() => {
+    let isCancelled = false;
+
+    const fetchAndDecodeAudio = async () => {
+      try {
+        const response = await fetch(src);
+        const arrayBuffer = await response.arrayBuffer();
+        const decodedAudio = await audioContext.decodeAudioData(arrayBuffer);
+        if (!isCancelled) {
+          setAudioBuf(decodedAudio);
+        }
+        const bufferSourceNode = audioContext.createBufferSource();
+        bufferSourceNodeRef.current?.disconnect();
+        bufferSourceNode.buffer = audioBuf;
+        bufferSourceNode.connect(gainNode);
+        bufferSourceNodeRef.current = bufferSourceNode;
+
+
+      } catch (error) {
+        console.error('Error fetching or decoding audio:', error);
+      }
+    };
+
+    fetchAndDecodeAudio();
+
+    return () => {
+      isCancelled = true;
+      bufferSourceNodeRef?.current?.disconnect()
+    };
+  }, [src, audioContext]);
+
+  useEffect(() => {
+    gainNode.connect(analyserNode);
+    analyserNode.connect(audioContext.destination);
+    return () => {
+      gainNode.disconnect();
+      analyserNode.disconnect();
+    };
+  }, [gainNode, analyserNode, audioContext]);
+
+  const relinkAndPlayBufferSource = useCallback((bufferSourceNode: sac.IAudioBufferSourceNode<sac.IAudioContext>, time: number) => {
+    bufferSourceNodeRef.current?.disconnect();
+    bufferSourceNode.buffer = audioBuf;
+    bufferSourceNode.connect(gainNode);
+    bufferSourceNode.start(0, time);
+    bufferSourceNodeRef.current = bufferSourceNode;
+  }, [audioBuf, gainNode]);
+
+  const handleAction = useCallback((action: 'play' | 'pause', time?: number) => {
+    if (action === 'play' && time !== undefined) {
+      const bufferSource = audioContext.createBufferSource();
+      const dt = clamp(0, iv.end, time - iv.start);
+      relinkAndPlayBufferSource(bufferSource, dt);
+    } else if (action === 'pause') {
+      bufferSourceNodeRef.current?.stop();
+    }
+  }, [relinkAndPlayBufferSource, iv, audioContext]);
+
+  const inInterval = useMemo(() => intervalPredicateFn(videoTime, iv), [videoTime, iv]);
+
+  useEffect(() => {
+    if (inInterval && isPlaying) {
+      if (!audioIsPlaying || isSeeking) {
+        handleAction('play', videoTime);
+        setAudioIsPlaying(true);
+      }
+    } else if (audioIsPlaying) {
+      handleAction('pause');
+      setAudioIsPlaying(false);
+    }
+  }, [inInterval, isPlaying, isSeeking, audioIsPlaying, handleAction, videoTime]);
+
+  return (
+    <motion.div
+      className={styles.container}
+      whileHover={{
+        backgroundColor: 'red',
+        transition: { duration: 1 },
+      }}
+      whileTap={{ backgroundColor: 'red', }}
+      style={{
+        height: '100%',
+        position: 'absolute',
+        left: `${(iv.start / videoDuration) * 100}%`,
+        width: `${((iv.end - iv.start) / videoDuration) * 100}%`,
+      }}>
+      <Visualiser node={analyserNode} paused={!isPlaying} type={FftDomain.TimeDomain} fillColor="blue" />
+    </motion.div>
   );
-
-  //setup
-  useEffect(() => {
-    soundRef.current = new Howl({ src });
-  }, []);
-
-  useEffect(() => {
-    switch (inInterval && isPlaying) {
-      case true:
-        handleSeek(iv, time);
-        handlePlay();
-        break;
-      case false:
-        handlePause();
-        break;
-    }
-  }, [inInterval, isPlaying]);
-
-  useEffect(() => {
-    handleSeek(iv, time);
-  }, [isSeeking]);
-
-  const handlePlay = () => {
-    if (!soundRef.current) return;
-
-    soundRef.current?.play();
-  };
-
-  const handlePause = () => {
-    if (!soundRef.current) return;
-
-    if (soundRef.current.playing()) {
-      soundRef.current?.pause();
-    }
-  };
-
-  const handleSeek = useCallback((iv: Interval, time: number) => {
-    if (!soundRef.current) return;
-    // T1                    time (t)                         T2
-    // |------------------------------------------------------| video clip
-    //                    |-------| audio clip
-    //                   t1       t2
-    // 0                 3        6                          21
-    //  <---  t1 - T1 --->
-    const dt = clamp(0, iv.end, time - iv.start);
-    soundRef.current.seek(dt);
-  }, []);
-
-  return null;
 };
 
 // utils

@@ -1,7 +1,6 @@
 /* eslint-disable import/no-webpack-loader-syntax */
-import { AudioContextContext } from "@/context/AudioContextContext";
-import { AudioContext } from "@/utils/audioContext";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import * as sac from 'standardized-audio-context';
 
 // import ADSRWorkletProcessor from "worklets/adsr-processor.worklet.ts?url";
 // import AndGateWorkletProcessor from "worklets/and-gate-processor.worklet.ts?url";
@@ -20,17 +19,25 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 // import TransformerWorkletProcessor from "worklets/transformer-processor.worklet.ts?url";
 // import XorGateWorkletProcessor from "worklets/xor-gate-processor.worklet.ts?url";
 
-interface Props {
-  children: React.ReactNode;
-}
 
-function Audio({ children }: Props) {
+
+const AudioContextContext = createContext<sac.IAudioContext>(new sac.AudioContext());
+
+
+interface IAudioContextContextProviderProps {
+  children: ReactNode;
+}
+const AudioContextContextProvider = ({ children }: IAudioContextContextProviderProps) => {
+
   const [ready, setReady] = useState(false);
 
-  const context = useMemo(() => new AudioContext(), []);
+  const context = useMemo(() => new sac.AudioContext(), [])
+
+
 
   useEffect(() => {
-    const awaitAudioWorkletProcessors = async (context: AudioContext) => {
+
+    const awaitAudioWorkletProcessors = async (context: sac.AudioContext) => {
       if (!context.audioWorklet) {
         return;
       }
@@ -62,8 +69,10 @@ function Audio({ children }: Props) {
   }, [context]);
 
   const resume = useCallback(() => {
+
     if (context?.state === "suspended") {
       context.resume();
+      console.log('Audio Context Resumed')
     }
   }, [context]);
 
@@ -79,12 +88,32 @@ function Audio({ children }: Props) {
   }
 
   return (
-    <div onClick={resume}>
+    <div onClick={resume} >
       <AudioContextContext.Provider value={context}>
         {children}
       </AudioContextContext.Provider>
     </div>
   );
-}
+};
 
-export { Audio };
+
+
+
+export const useAudioContextContext = () => {
+  const context = useContext(AudioContextContext);
+
+  if (!context) {
+    throw new Error("useAudioContextContext must be used inside the AudioContextContextProvider");
+  }
+
+  return context;
+};
+
+
+
+
+
+
+
+
+export { AudioContextContextProvider };
