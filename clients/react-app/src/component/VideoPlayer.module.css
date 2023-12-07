@@ -73,24 +73,3 @@
 
 
 
-@keyframes moveToVideo {
-    from {
-      left: calc((100% - 32px) * var(--pin-time-ratio) + 16px - 2px);
-      bottom: 22px;
-    }
-    to {
-      left: var(--pin-x-percent);
-      bottom: calc(100% - var(--pin-y-percent));
-    }
-  }
-  
-  @keyframes moveToControl {
-    from {
-      left: var(--pin-x-percent);
-      bottom: calc(100% - var(--pin-y-percent));
-    }
-    to {
-      left: calc((100% - 32px) * var(--pin-time-ratio) + 16px - 2px);
-      bottom: 22px;
-    }
-  }
