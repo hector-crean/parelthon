@@ -8,6 +8,7 @@ import { MantineProvider, createTheme } from "@mantine/core";
 import { useDisclosure, useHeadroom } from "@mantine/hooks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Route, Switch } from "wouter";
+import { AudioContextContextProvider } from "./component/Audio";
 import { routes } from "./routes";
 
 const theme = createTheme({
@@ -31,13 +32,16 @@ const App = () => {
 
   return (
     <MantineProvider theme={theme}>
-      <QueryClientProvider client={queryClient}>
-        <Switch>
-          {routes.map(({ path, component }) => (
-            <Route key={`${path}`} path={path} component={component} />
-          ))}
-        </Switch>
-      </QueryClientProvider>
+      <AudioContextContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <Switch>
+            {routes.map(({ path, component }) => (
+              <Route key={`${path}`} path={path} component={component} />
+            ))}
+          </Switch>
+        </QueryClientProvider>
+      </AudioContextContextProvider>
+
     </MantineProvider>
   );
 };

@@ -1,4 +1,4 @@
-import { useAudioContext } from '@/context/AudioContextContext';
+import { useAudioContextContext } from "@/component/Audio";
 import { DependencyList, useMemo } from "react";
 import * as sac from 'standardized-audio-context';
 
@@ -7,10 +7,10 @@ type NodeFactory<T extends sac.IAudioNode<sac.AudioContext>> = (context: sac.IAu
 const useAudioNode = <T extends sac.IAudioNode<sac.AudioContext>>(
     id: string,
     nodeFactory: NodeFactory<T>,
-    dependencies?: DependencyList
+    dependencies: DependencyList = [] // default value
 ) => {
-    const context = useAudioContext();
-    const node = useMemo(() => nodeFactory(context), dependencies);
+    const context = useAudioContextContext();
+    const node = useMemo(() => nodeFactory(context), [context, ...dependencies]);
     return node;
 };
 

@@ -34,10 +34,11 @@ const VideoGalleryPage = () => {
           {({ data }) => {
             return data.map((video) => (
               <VideoCard
-                key={video.s3_key}
-                src={video.s3_url}
-                controls={false}
                 {...video}
+                key={video.s3_key}
+                url={video.s3_url}
+                controls={false}
+                audioTracks={[]}
               />
             ));
           }}
