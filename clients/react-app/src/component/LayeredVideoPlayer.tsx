@@ -1,5 +1,6 @@
 import { createComment } from "@/api/comments";
 import { MediaAspectRatioContainer } from "@/component/ResizeContainer";
+import dnaOutline from '@/data/dna-shape.json';
 import { CreateVideoComment, VideoComment } from "@/models/comment";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
@@ -7,21 +8,18 @@ import {
   PointerEvent,
   ReactNode,
   memo,
-  useCallback,
-  useRef,
+  useMemo,
   useState
 } from "react";
-
 
 import { Video } from '@/component/Video';
 import { useStageContext } from "@/context/StageContext";
 import { Audio } from "@/models/audio";
 import type { Video as IVideo } from "@/models/video";
 import { CanvasMode, CanvasState } from "@/types";
-import { throttle } from "lodash";
 import { Frame } from "./Frame";
+import styles from "./LayeredVideoPlayer.module.css";
 import { OutlinePath } from "./OutlinePath";
-import styles from "./VideoPlayer.module.css";
 import { Label } from "./labels/Label";
 
 ///
@@ -35,7 +33,7 @@ export enum VideoPlayerMode {
   Editor,
 }
 
-type VideoPlayerProps = {
+type LayeredVideoPlayerProps = {
   mode: VideoPlayerMode;
   videoPayload: IVideo;
   videoComments: Array<VideoComment>;
@@ -45,17 +43,19 @@ type VideoPlayerProps = {
   soundtrack: Array<Audio>;
 };
 
-const VideoPlayer = ({
+const LayeredVideoPlayer = ({
   videoPayload,
   videoComments,
   changeVideo,
   nextVideo,
   soundtrack,
-}: VideoPlayerProps) => {
+}: LayeredVideoPlayerProps) => {
   //refs
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  const { aspectRatio: [aw, ah], isPlaying, time } = useStageContext()
+  const { aspectRatio: [aw, ah], isPlaying } = useStageContext()
+
+  console.log(aw, ah)
+
 
   //state
   const [comments, setComments] = useState<Array<VideoComment>>(videoComments);
@@ -72,9 +72,6 @@ const VideoPlayer = ({
   });
 
   //queries + mutations
-
-
-
   const commentsMutation = useMutation({
     mutationFn: (requestBody: CreateVideoComment) => {
       return createComment(requestBody);
@@ -82,16 +79,19 @@ const VideoPlayer = ({
   });
 
 
+  // const handlePointerMove = useCallback(
+  //   throttle((e: PointerEvent<HTMLVideoElement>) => {
+  //     if (videoRef.current) {
+  //       const { x, y } = getPointerPositionWithinElement(videoRef.current, e);
+  //       setTooltipPosition({ x, y });
+  //     }
+  //   }, 100),
+  //   [videoRef]
+  // );
 
-  const handlePointerMove = useCallback(
-    throttle((e: PointerEvent<HTMLVideoElement>) => {
-      if (videoRef.current) {
-        const { x, y } = getPointerPositionWithinElement(videoRef.current, e);
-        setTooltipPosition({ x, y });
-      }
-    }, 100),
-    [videoRef]
-  );
+  const dnaOutlineFn = () => dnaOutline.map(point => ([point.x, point.y]));
+
+  const dnaOutlineMemoed = useMemo(dnaOutlineFn, [])
 
   return (
     <AnimatePresence>
@@ -115,14 +115,7 @@ const VideoPlayer = ({
                       <OutlinePath
                         xScale={xScale}
                         yScale={yScale}
-                        points={[
-                          [1, 0],
-                          [0.3, 0.3],
-                          [0.9, 0.4],
-                          [0.3, 0.2],
-
-                          [1, 0],
-                        ]}
+                        points={dnaOutlineMemoed}
                       />
                     </g>
                   )}
@@ -137,14 +130,14 @@ const VideoPlayer = ({
                       <Video
                         url={videoPayload.s3_url}
                         audioTracks={soundtrack}
-                        onPointerMove={handlePointerMove}
+                        onPointerMove={() => { }}
                       />
 
 
                       {comments.map((comment) => (
                         <Label
                           key={`${comment.comment_id}`}
-                          currentTime={time}
+                          // currentTime={time}
                           comment={comment}
                         />
                       ))}
@@ -174,7 +167,7 @@ const VideoPlayer = ({
   );
 };
 
-export { VideoPlayer };
+export { LayeredVideoPlayer };
 
 interface CursorTooltipProps {
   position: { x: number; y: number };

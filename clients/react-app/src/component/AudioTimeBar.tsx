@@ -95,6 +95,8 @@ const AudioTimeBar = (props: Props) => {
         min={0}
         max={duration}
         value={time}
+        // label={(v) => Math.round((v + Number.EPSILON) * 100) / 100}
+        label={(v) => Math.round(v)}
         precision={2}
         step={0.1}
         onChange={handleSliderChange}

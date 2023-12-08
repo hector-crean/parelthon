@@ -1,6 +1,6 @@
 import { getVideoWithCommentsByVideoId } from "@/api/comments";
+import { LayeredVideoPlayer, VideoPlayerMode } from "@/component/LayeredVideoPlayer";
 import { QueryResult } from "@/component/QueryResult";
-import { VideoPlayer, VideoPlayerMode } from "@/component/VideoPlayer";
 import { StageProvider } from "@/context/StageContext";
 import { VideoLayout } from "@/layouts/VideoLayout";
 import { audiosExample } from "@/models/audio";
@@ -63,7 +63,7 @@ const VideoPage = () => {
           <StageProvider>
             <VideoLayout
               video={
-                <VideoPlayer
+                <LayeredVideoPlayer
                   videoPayload={video}
                   mode={VideoPlayerMode.Editor}
                   videoComments={comments}

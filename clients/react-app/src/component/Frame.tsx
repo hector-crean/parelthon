@@ -49,12 +49,13 @@ const Frame = ({
   htmlLayer,
   canvasLayer,
 }: FrameProps) => {
+
   const [canvasState, setState] = useState<CanvasState>({
     mode: CanvasMode.None,
   });
 
-  const handleClickOutside = useCallback(() => {}, []);
-  const handleMovePointer = useCallback(() => {}, []);
+  const handleClickOutside = useCallback(() => { }, []);
+  const handleMovePointer = useCallback(() => { }, []);
 
   return (
     <RelativeContainer zIndex={ZIndex.Zero}>
@@ -63,7 +64,7 @@ const Frame = ({
         zIndex={ZIndex.Four}
         style={{ pointerEvents: "none" }}
       >
-        <Svg innerWidth={width} innerHeight={height} aspectRatio={aspectRatio}>
+        <Svg innerWidth={width} innerHeight={height} aspectRatio={aspectRatio} pointerEvents={'all'}>
           {({ xScale, yScale, margin }) => (
             <>
               <GradientPinkBlue id={BG_PATTERN_ID} />
@@ -76,8 +77,8 @@ const Frame = ({
                 fill="transparent"
                 onPointerMove={handleMovePointer}
                 onPointerLeave={handleClickOutside}
-                // onPointerDown={handleClickOutside}
-                // onPointerMove={handleMovePointer}
+              // onPointerDown={handleClickOutside}
+              // onPointerMove={handleMovePointer}
               />
               {/* background */}
               <rect
@@ -88,8 +89,8 @@ const Frame = ({
                 fill={`url(#${BG_PATTERN_ID})`}
                 fillOpacity={0.3}
                 pointerEvents={"none"}
-                //   animate={{ stdDeviation: isHovered ? 0 : 10 }}
-                // filter="url(#my-filter)"
+              //   animate={{ stdDeviation: isHovered ? 0 : 10 }}
+              // filter="url(#my-filter)"
               />
 
               <Group top={margin.top} left={margin.left}>

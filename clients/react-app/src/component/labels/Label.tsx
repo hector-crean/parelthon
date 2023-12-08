@@ -1,4 +1,5 @@
 import ribosome_path from "@/assets/images/ribosome.jpeg";
+import { useStageContext } from "@/context/StageContext";
 import { VideoComment } from "@/models/comment";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
@@ -15,11 +16,16 @@ type Interval = { start: number; end: number };
 
 interface LabelProps {
   comment: VideoComment;
-  currentTime: number;
+  // currentTime: number;
   arrowLayout?: Quadrant;
 }
 
-export const Label = ({ comment, currentTime, arrowLayout }: LabelProps) => {
+export const Label = ({ comment, arrowLayout }: LabelProps) => {
+
+  const { time: currentTime } = useStageContext()
+
+
+
   const [isOpen, setIsOpen] = useState(false);
   const [{ start, end }, _] = useState<Interval>({
     start: comment.start_time,

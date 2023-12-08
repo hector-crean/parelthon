@@ -3,6 +3,7 @@ import { PatternCircles, PatternWaves } from "@visx/pattern";
 import { ScaleLinear } from "@visx/vendor/d3-scale";
 import { curveCatmullRom, line } from "d3";
 import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useMemo, useState } from "react";
 
 const RADIAL_GRADIENT_ID = "gradient";
 const GLOW_FILTER_ID = "glow";
@@ -22,13 +23,20 @@ const OutlinePath = ({
   yScale,
   active = true,
 }: OutlinePathsProps) => {
-  const accessorX = (d: [number, number]) => xScale(d[0]);
-  const accessorY = (d: [number, number]) => yScale(d[1]);
 
-  const pathFn = line()
+
+  const [isHovered, setHovered] = useState(false)
+
+
+
+
+  const accessorX = useCallback((d: [number, number]) => xScale(d[0]), [xScale])
+  const accessorY = useCallback((d: [number, number]) => yScale(d[1]), [yScale]);
+
+  const pathFn = useMemo(() => line()
     .x(accessorX)
     .y(accessorY)
-    .curve(curveCatmullRom.alpha(0.5));
+    .curve(curveCatmullRom.alpha(0.5)), [accessorX, accessorY]);
 
   return (
     <AnimatePresence>
@@ -130,15 +138,23 @@ const OutlinePath = ({
             id="mask-path"
             stroke-linecap="round"
             stroke-linejoin="round"
-            stroke-opacity=".8"
-            fill-opacity="0"
-            stroke="#1d85bb"
             stroke-width="3"
             filter={`url(#${GLOW_FILTER_ID})`}
             d={pathFn(points) ?? ""}
-            initial={{ opacity: 0 }}
+            stroke-opacity=".8"
+            stroke={"#1d85bb"}
+            fill-opacity="1"
+            fill={isHovered ? 'red' : 'transparent'}
+            initial={{ opacity: 0, }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.5 }}
+
+
+            onPointerEnter={() => {
+              console.log('entering')
+              setHovered(true)
+            }}
+
           ></motion.path>
         </>
       )}

@@ -21,6 +21,7 @@ const Svg = ({
   aspectRatio: [aw, ah],
   children,
 }: SvgProps) => {
+
   const margin = useMemo(() => {
     return computeMarginForAspectRatio(innerWidth, innerHeight, aw, ah);
   }, [innerWidth, innerHeight, aw, ah]);
@@ -91,9 +92,9 @@ const renderSvg = (data: SvgElement) => {
 
 type PropsWithoutChildren<P> = P extends any
   ? "children" extends keyof P
-    ? Omit<P, "children">
-    : P
+  ? Omit<P, "children">
+  : P
   : P;
 
-export { Svg };
-export { renderSvg };
+export { renderSvg, Svg };
+

@@ -46,7 +46,7 @@ const ResizeContainer = <T extends ElementType>({
     () =>
       throttle(({ width, height, top, left }: DOMRectReadOnly) => {
         setContainerRect({ width, height, top, left });
-      }, 100), // Throttling to at most once every 100 milliseconds
+      }, 500), // Throttling to at most once every 500 milliseconds
     []
   );
 
@@ -125,8 +125,8 @@ const MediaAspectRatioContainer = ({
 // util types:
 type PropsWithoutChildren<P> = P extends any
   ? "children" extends keyof P
-    ? Omit<P, "children">
-    : P
+  ? Omit<P, "children">
+  : P
   : P;
 
 interface Rect {
@@ -136,4 +136,5 @@ interface Rect {
   left: number;
 }
 
-export { ResizeContainer, MediaAspectRatioContainer };
+export { MediaAspectRatioContainer, ResizeContainer };
+
