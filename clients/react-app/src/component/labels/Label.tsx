@@ -21,10 +21,7 @@ interface LabelProps {
 }
 
 export const Label = ({ comment, arrowLayout }: LabelProps) => {
-
-  const { time: currentTime } = useStageContext()
-
-
+  const { time: currentTime } = useStageContext();
 
   const [isOpen, setIsOpen] = useState(false);
   const [{ start, end }, _] = useState<Interval>({
@@ -48,22 +45,24 @@ export const Label = ({ comment, arrowLayout }: LabelProps) => {
   //   store.removeActiveCommentId(comment.comment_id);
   // }
 
+  // the coordinate system origin starts in the top left:
+
   const quadrantFn = (x: number, y: number): Quadrant => {
     //top right
-    if (x >= 0.5 * 100 && y >= 0.5 * 100) {
+    if (x >= 0.5 * 100 && y <= 0.5 * 100) {
       return "top-right";
     }
     //top left
-    if (x < 0.5 * 100 && y >= 0.5 * 100) {
+    if (x < 0.5 * 100 && y <= 0.5 * 100) {
       return "top-left";
     }
     //bottom right
-    if (x >= 0.5 * 100 && y < 0.5 * 100) {
+    if (x >= 0.5 * 100 && y > 0.5 * 100) {
       return "bottom-right";
     }
-    //top left
+    //bottom left
     if (x < 0.5 * 100 && y > 0.5 * 100) {
-      return "top-left";
+      return "bottom-left";
     }
 
     return "top-left";
@@ -81,6 +80,8 @@ export const Label = ({ comment, arrowLayout }: LabelProps) => {
         return "bottom-left";
     }
   };
+
+  console.log(comment.screen_x, comment.screen_y);
 
   const [layout, setLayout] = useState<Quadrant>(
     arrowLayout

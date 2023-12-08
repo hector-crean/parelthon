@@ -10,37 +10,37 @@
     z-index: 1280;
   }
 
-  &[data-arrow-layout="top-left"] {
+  &[data-arrow-layout="bottom-right"] {
     transform: translate(0%, 0%);
     border-radius: 0px var(--badge-radius) var(--badge-radius)
       var(--badge-radius);
   }
-  &[data-arrow-layout="top-right"] {
+  &[data-arrow-layout="bottom-left"] {
     transform: translate(-100%, 0%);
     border-radius: var(--badge-radius) 0px var(--badge-radius)
       var(--badge-radius);
   }
-  &[data-arrow-layout="bottom-left"] {
+  &[data-arrow-layout="top-right"] {
     transform: translate(0%, -100%);
     border-radius: var(--badge-radius) var(--badge-radius) var(--badge-radius)
       0px;
   }
-  &[data-arrow-layout="bottom-right"] {
+  &[data-arrow-layout="top-left"] {
     transform: translate(-100%, -100%);
     border-radius: var(--badge-radius) var(--badge-radius) 0px
       var(--badge-radius);
   }
 
-  &[data-arrow-layout="top-left"][data-open="true"] {
+  &[data-arrow-layout="bottom-right"][data-open="true"] {
     border-radius: 0px 10px 10px 10px;
   }
-  &[data-arrow-layout="top-right"][data-open="true"] {
+  &[data-arrow-layout="bottom-left"][data-open="true"] {
     border-radius: 10px 0px 10px 10px;
   }
-  &[data-arrow-layout="bottom-left"][data-open="true"] {
+  &[data-arrow-layout="top-right"][data-open="true"] {
     border-radius: 10px 10px 10px 0px;
   }
-  &[data-arrow-layout="bottom-right"][data-open="true"] {
+  &[data-arrow-layout="top-left"][data-open="true"] {
     border-radius: 10px 10px 0px 10px;
   }
 
