@@ -1,4 +1,4 @@
-import { useAudioContextContext } from "@/component/Audio";
+import { useAudioContextContext } from "@/context/Audio";
 import { DependencyList, useMemo } from "react";
 import * as sac from 'standardized-audio-context';
 
@@ -16,3 +16,4 @@ const useAudioNode = <T extends sac.IAudioNode<sac.AudioContext>>(
 
 
 export { useAudioNode };
+

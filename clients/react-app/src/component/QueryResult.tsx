@@ -19,9 +19,9 @@ function QueryResult<TData>({
   renderError = () => null,
 }: Props<TData>): ReactNode {
   if (queryResult.isLoading) {
-    return renderLoading();
+    return <>{renderLoading()}</>;
   } else if (queryResult.isError) {
-    return renderError(queryResult.error);
+    return <>{renderError(queryResult.error)}</>;
   } else if (queryResult.isSuccess && queryResult.data) {
     return (
       <>
@@ -30,9 +30,8 @@ function QueryResult<TData>({
         })}
       </>
     );
-  } else {
-    return null;
   }
+  return null;
 }
 
 export { QueryResult };

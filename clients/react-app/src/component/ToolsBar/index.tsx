@@ -1,4 +1,4 @@
-import { CanvasMode, CanvasState, LayerType } from "@/types";
+import { EditMode, EditState } from "@/models/canvas";
 import EllipseButton from "./EllipseButton";
 import PencilButton from "./PencilButton";
 import RectangleButton from "./RectangleButton";
@@ -8,56 +8,61 @@ import UndoButton from "./UndoButton";
 import styles from "./index.module.css";
 
 type Props = {
-  canvasState: CanvasState;
-  setCanvasState: (newState: CanvasState) => void;
+  EditState: EditState;
+  setEditState: (newState: EditState) => void;
   undo: () => void;
   redo: () => void;
   canUndo: boolean;
   canRedo: boolean;
 };
 
-export default function ToolsBar(
-  { canvasState, setCanvasState, undo, redo, canUndo, canRedo }: Props
-) {
+export default function ToolsBar({
+  EditState,
+  setEditState,
+  undo,
+  redo,
+  canUndo,
+  canRedo,
+}: Props) {
   return (
     <div className={styles.tools_panel_container}>
       <div className={styles.tools_panel}>
         <div className={styles.tools_panel_section}>
           <SelectionButton
             isActive={
-              canvasState.mode === CanvasMode.None ||
-              canvasState.mode === CanvasMode.Translating ||
-              canvasState.mode === CanvasMode.SelectionNet ||
-              canvasState.mode === CanvasMode.Pressing ||
-              canvasState.mode === CanvasMode.Resizing
+              EditState.mode === EditMode.None ||
+              EditState.mode === EditMode.Translating ||
+              EditState.mode === EditMode.SelectionNet ||
+              EditState.mode === EditMode.Pressing ||
+              EditState.mode === EditMode.Resizing
             }
-            onClick={() => setCanvasState({ mode: CanvasMode.None })}
+            onClick={() => setEditState({ mode: EditMode.None })}
           />
           <PencilButton
-            isActive={canvasState.mode === CanvasMode.Pencil}
-            onClick={() => setCanvasState({ mode: CanvasMode.Pencil })}
+            isActive={EditState.mode === EditMode.Pencil}
+            onClick={() => setEditState({ mode: EditMode.Pencil })}
           />
           <RectangleButton
             isActive={
-              canvasState.mode === CanvasMode.Inserting &&
-              canvasState.layerType === LayerType.Rectangle
+              EditState.mode === EditMode.Inserting &&
+              EditState.layerType === "Polygon"
             }
             onClick={() =>
-              setCanvasState({
-                mode: CanvasMode.Inserting,
-                layerType: LayerType.Rectangle,
+              setEditState({
+                mode: EditMode.Inserting,
+                layerType: "Polygon",
               })
             }
           />
           <EllipseButton
             isActive={
-              canvasState.mode === CanvasMode.Inserting &&
-              canvasState.layerType === LayerType.Ellipse
+              EditState.mode === EditMode.Inserting &&
+              EditState.layerType === "Point"
             }
             onClick={() =>
-              setCanvasState({
-                mode: CanvasMode.Inserting,
-                layerType: LayerType.Ellipse,
+              setEditState({
+                mode: EditMode.Inserting,
+                layerType: "Point",
               })
             }
           />

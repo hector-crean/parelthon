@@ -1,6 +1,7 @@
 import { getVideoWithCommentsByVideoId } from "@/api/comments";
-import { LayeredVideoPlayer, VideoPlayerMode } from "@/component/LayeredVideoPlayer";
+import { LayeredVideoPlayer } from "@/component/LayeredVideoPlayer";
 import { QueryResult } from "@/component/QueryResult";
+import { AppStateProvider } from "@/context/EditorContext";
 import { StageProvider } from "@/context/StageContext";
 import { VideoLayout } from "@/layouts/VideoLayout";
 import { audiosExample } from "@/models/audio";
@@ -60,31 +61,31 @@ const VideoPage = () => {
         const videoIdx = videos.findIndex((v) => v.video_id === video.video_id);
 
         return (
-          <StageProvider>
-            <VideoLayout
-              video={
-                <LayeredVideoPlayer
-                  videoPayload={video}
-                  mode={VideoPlayerMode.Editor}
-                  videoComments={comments}
-                  changeVideo={(videoId: string) =>
-                    setLocation(`/videos/${videoId}`)
-                  }
-                  soundtrack={audiosExample}
-                  nextVideo={wrappedArrayLookup(videos, videoIdx + 1)}
-                  prevVideo={wrappedArrayLookup(videos, videoIdx - 1)}
-                />
-              }
-              sidebar={<div></div>}
-              expandingFooter={
-                <section id="video-overview">
-                  <h1>{video.title}</h1>
-                  <h2>{video.created_at}</h2>
-                </section>
-              }
-            />
-          </StageProvider>
-
+          <AppStateProvider>
+            <StageProvider>
+              <VideoLayout
+                video={
+                  <LayeredVideoPlayer
+                    videoPayload={video}
+                    videoComments={comments}
+                    changeVideo={(videoId: string) =>
+                      setLocation(`/videos/${videoId}`)
+                    }
+                    soundtrack={audiosExample}
+                    nextVideo={wrappedArrayLookup(videos, videoIdx + 1)}
+                    prevVideo={wrappedArrayLookup(videos, videoIdx - 1)}
+                  />
+                }
+                sidebar={<div></div>}
+                expandingFooter={
+                  <section id="video-overview">
+                    <h1>{video.title}</h1>
+                    <h2>{video.created_at}</h2>
+                  </section>
+                }
+              />
+            </StageProvider>
+          </AppStateProvider>
         );
       }}
     </QueryResult>
@@ -92,4 +93,3 @@ const VideoPage = () => {
 };
 
 export { VideoPage, useVideoPageStore };
-

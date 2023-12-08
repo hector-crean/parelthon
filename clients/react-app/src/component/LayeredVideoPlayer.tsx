@@ -1,22 +1,16 @@
 import { createComment } from "@/api/comments";
 import { MediaAspectRatioContainer } from "@/component/ResizeContainer";
-import dnaOutline from '@/data/dna-shape.json';
+import dnaOutline from "@/data/dna-shape.json";
 import { CreateVideoComment, VideoComment } from "@/models/comment";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  PointerEvent,
-  ReactNode,
-  memo,
-  useMemo,
-  useState
-} from "react";
+import { PointerEvent, ReactNode, memo, useMemo, useState } from "react";
 
-import { Video } from '@/component/Video';
+import { Video } from "@/component/Video";
+import { useEditorContext } from "@/context/EditorContext";
 import { useStageContext } from "@/context/StageContext";
 import { Audio } from "@/models/audio";
 import type { Video as IVideo } from "@/models/video";
-import { CanvasMode, CanvasState } from "@/types";
 import { Frame } from "./Frame";
 import styles from "./LayeredVideoPlayer.module.css";
 import { OutlinePath } from "./OutlinePath";
@@ -24,17 +18,12 @@ import { Label } from "./labels/Label";
 
 ///
 
-
-
-
-
 export enum VideoPlayerMode {
   Viewer,
   Editor,
 }
 
 type LayeredVideoPlayerProps = {
-  mode: VideoPlayerMode;
   videoPayload: IVideo;
   videoComments: Array<VideoComment>;
   changeVideo: (videoId: string) => void;
@@ -52,10 +41,12 @@ const LayeredVideoPlayer = ({
 }: LayeredVideoPlayerProps) => {
   //refs
 
-  const { aspectRatio: [aw, ah], isPlaying } = useStageContext()
+  const { EditState } = useEditorContext();
 
-  console.log(aw, ah)
-
+  const {
+    aspectRatio: [aw, ah],
+    isPlaying,
+  } = useStageContext();
 
   //state
   const [comments, setComments] = useState<Array<VideoComment>>(videoComments);
@@ -63,13 +54,8 @@ const LayeredVideoPlayer = ({
     x: 0,
     y: 0,
   });
-
   const [cursorTooltipContent, setCursorTooltipContent] =
     useState<ReactNode>(null);
-
-  const [canvasState, setCanvasState] = useState<CanvasState>({
-    mode: CanvasMode.None,
-  });
 
   //queries + mutations
   const commentsMutation = useMutation({
@@ -77,7 +63,6 @@ const LayeredVideoPlayer = ({
       return createComment(requestBody);
     },
   });
-
 
   // const handlePointerMove = useCallback(
   //   throttle((e: PointerEvent<HTMLVideoElement>) => {
@@ -89,9 +74,10 @@ const LayeredVideoPlayer = ({
   //   [videoRef]
   // );
 
-  const dnaOutlineFn = () => dnaOutline.map(point => ([point.x, point.y]));
+  const dnaOutlineFn = () =>
+    dnaOutline.map((point) => [point.x, point.y] as [number, number]);
 
-  const dnaOutlineMemoed = useMemo(dnaOutlineFn, [])
+  const dnaOutlineMemoed = useMemo(dnaOutlineFn, []);
 
   return (
     <AnimatePresence>
@@ -110,7 +96,6 @@ const LayeredVideoPlayer = ({
                   height={height}
                   aspectRatio={[aw, ah]}
                   svgLayer={({ xScale, yScale }) => (
-
                     <g>
                       <OutlinePath
                         xScale={xScale}
@@ -130,9 +115,8 @@ const LayeredVideoPlayer = ({
                       <Video
                         url={videoPayload.s3_url}
                         audioTracks={soundtrack}
-                        onPointerMove={() => { }}
+                        onPointerMove={() => {}}
                       />
-
 
                       {comments.map((comment) => (
                         <Label
@@ -142,19 +126,15 @@ const LayeredVideoPlayer = ({
                         />
                       ))}
 
-
-
                       {/* Video controls */}
                       {/* <ToolsBar
-                        canvasState={canvasState}
-                        setCanvasState={setCanvasState}
+                        EditState={EditState}
+                        setEditState={setEditState}
                         undo={() => { }}
                         redo={() => { }}
                         canUndo={true}
                         canRedo={true}
                       /> */}
-
-
                     </>
                   )}
                 />

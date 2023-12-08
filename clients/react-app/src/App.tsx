@@ -8,7 +8,7 @@ import { MantineProvider, createTheme } from "@mantine/core";
 import { useDisclosure, useHeadroom } from "@mantine/hooks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Route, Switch } from "wouter";
-import { AudioContextContextProvider } from "./component/Audio";
+import { AudioContextContextProvider } from "./context/Audio";
 import { routes } from "./routes";
 
 const theme = createTheme({
@@ -41,7 +41,6 @@ const App = () => {
           </Switch>
         </QueryClientProvider>
       </AudioContextContextProvider>
-
     </MantineProvider>
   );
 };
