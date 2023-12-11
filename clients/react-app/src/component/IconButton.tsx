@@ -1,3 +1,4 @@
+import { MouseEventHandler } from "react";
 import styles from "./IconButton.module.css";
 
 type Props = {
@@ -7,13 +8,21 @@ type Props = {
   disabled?: boolean;
 };
 
-export default function IconButton(
-  { onClick, children, isActive, disabled }: Props
-) {
+export default function IconButton({
+  onClick,
+  children,
+  isActive,
+  disabled,
+}: Props) {
+  const onClickHandler: MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onClick();
+  };
   return (
     <button
       className={`${styles.button} ${isActive ? styles.button_active : ""}`}
-      onClick={onClick}
+      onClick={onClickHandler}
       disabled={disabled}
     >
       {children}

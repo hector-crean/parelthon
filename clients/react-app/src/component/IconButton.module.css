@@ -1,6 +1,6 @@
 .button {
-  min-width: 28px;
-  min-height: 28px;
+  min-width: 20px;
+  min-height: 20px;
   border-radius: 6px;
   color: var(--color-foreground-200);
   display: flex;

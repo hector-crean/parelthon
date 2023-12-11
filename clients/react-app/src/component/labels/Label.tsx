@@ -1,6 +1,16 @@
 import ribosome_path from "@/assets/images/ribosome.jpeg";
 import { useStageContext } from "@/context/StageContext";
+import { AppState } from "@/models/canvas";
 import { VideoComment } from "@/models/comment";
+import { TextInput } from "@mantine/core";
+import { Link, RichTextEditor } from "@mantine/tiptap";
+import Highlight from "@tiptap/extension-highlight";
+import SubScript from "@tiptap/extension-subscript";
+import Superscript from "@tiptap/extension-superscript";
+import TextAlign from "@tiptap/extension-text-align";
+import Underline from "@tiptap/extension-underline";
+import { useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import styles from "./Label.module.css";
@@ -18,9 +28,10 @@ interface LabelProps {
   comment: VideoComment;
   // currentTime: number;
   arrowLayout?: Quadrant;
+  appState: AppState;
 }
 
-export const Label = ({ comment, arrowLayout }: LabelProps) => {
+export const Label = ({ comment, arrowLayout, appState }: LabelProps) => {
   const { time: currentTime } = useStageContext();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -81,8 +92,6 @@ export const Label = ({ comment, arrowLayout }: LabelProps) => {
     }
   };
 
-  console.log(comment.screen_x, comment.screen_y);
-
   const [layout, setLayout] = useState<Quadrant>(
     arrowLayout
       ? arrowLayout
@@ -90,6 +99,21 @@ export const Label = ({ comment, arrowLayout }: LabelProps) => {
   );
 
   const [isActive, setIsActive] = useState(false);
+
+  const content = "Label Content";
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Underline,
+      Link,
+      Superscript,
+      SubScript,
+      Highlight,
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+    ],
+    content,
+  });
 
   return (
     <AnimatePresence>
@@ -135,15 +159,19 @@ export const Label = ({ comment, arrowLayout }: LabelProps) => {
               <div>
                 <span>Heading</span> <span>Subtitle</span>
               </div>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-              </p>
+              <TextInput label="Title" placeholder="title" />{" "}
+              <RichTextEditor
+                editor={editor}
+                styles={{
+                  content: {
+                    color: "white",
+                    backgroundColor: "black",
+                    border: "0px",
+                  },
+                }}
+              >
+                <RichTextEditor.Content />
+              </RichTextEditor>
             </motion.div>
           </motion.div>
         </motion.div>

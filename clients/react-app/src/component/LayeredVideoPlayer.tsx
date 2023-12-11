@@ -1,19 +1,20 @@
-import { createComment } from "@/api/comments";
 import { MediaAspectRatioContainer } from "@/component/ResizeContainer";
 import dnaOutline from "@/data/dna-shape.json";
-import { CreateVideoComment, VideoComment } from "@/models/comment";
-import { useMutation } from "@tanstack/react-query";
+import { VideoComment } from "@/models/comment";
 import { AnimatePresence, motion } from "framer-motion";
-import { PointerEvent, ReactNode, memo, useMemo, useState } from "react";
+import { ReactNode, memo, useMemo, useState } from "react";
 
 import { Video } from "@/component/Video";
-import { useEditorContext } from "@/context/EditorContext";
+import { useAppContext } from "@/context/EditorContext";
 import { useStageContext } from "@/context/StageContext";
 import { Audio } from "@/models/audio";
+import { AppState, EditState } from "@/models/canvas";
 import type { Video as IVideo } from "@/models/video";
 import { Frame } from "./Frame";
 import styles from "./LayeredVideoPlayer.module.css";
+import { Match } from "./Match";
 import { OutlinePath } from "./OutlinePath";
+import ToolsBar from "./ToolsBar";
 import { Label } from "./labels/Label";
 
 ///
@@ -41,43 +42,40 @@ const LayeredVideoPlayer = ({
 }: LayeredVideoPlayerProps) => {
   //refs
 
-  const { EditState } = useEditorContext();
+  const { appState, setAppState } = useAppContext();
 
   const {
     aspectRatio: [aw, ah],
     isPlaying,
+    time,
   } = useStageContext();
 
   //state
   const [comments, setComments] = useState<Array<VideoComment>>(videoComments);
-  const [cursorTooltipPosition, setTooltipPosition] = useState({
+  const [cursorPosition, setCursorPosition] = useState({
     x: 0,
     y: 0,
   });
-  const [cursorTooltipContent, setCursorTooltipContent] =
-    useState<ReactNode>(null);
-
-  //queries + mutations
-  const commentsMutation = useMutation({
-    mutationFn: (requestBody: CreateVideoComment) => {
-      return createComment(requestBody);
-    },
-  });
-
-  // const handlePointerMove = useCallback(
-  //   throttle((e: PointerEvent<HTMLVideoElement>) => {
-  //     if (videoRef.current) {
-  //       const { x, y } = getPointerPositionWithinElement(videoRef.current, e);
-  //       setTooltipPosition({ x, y });
-  //     }
-  //   }, 100),
-  //   [videoRef]
-  // );
 
   const dnaOutlineFn = () =>
     dnaOutline.map((point) => [point.x, point.y] as [number, number]);
 
   const dnaOutlineMemoed = useMemo(dnaOutlineFn, []);
+
+  const renderCustorContent = ({
+    state,
+    isPlaying,
+  }: {
+    state: AppState;
+    isPlaying: boolean;
+  }) => {
+    switch (state.kind) {
+      case "edit":
+        return "edit";
+      case "view":
+        return "view";
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -95,6 +93,10 @@ const LayeredVideoPlayer = ({
                   width={width}
                   height={height}
                   aspectRatio={[aw, ah]}
+                  setCursorPosition={setCursorPosition}
+                  setComments={setComments}
+                  time={time}
+                  appState={appState}
                   svgLayer={({ xScale, yScale }) => (
                     <g>
                       <OutlinePath
@@ -107,15 +109,17 @@ const LayeredVideoPlayer = ({
                   canvasLayer={() => null}
                   htmlLayer={() => (
                     <>
-                      <CursorTooltip position={cursorTooltipPosition}>
-                        {isPlaying ? "click to comment" : "click to resume"}
+                      <CursorTooltip position={cursorPosition}>
+                        {renderCustorContent({
+                          state: appState,
+                          isPlaying: isPlaying,
+                        })}
                       </CursorTooltip>
 
                       {/* Video player */}
                       <Video
                         url={videoPayload.s3_url}
                         audioTracks={soundtrack}
-                        onPointerMove={() => {}}
                       />
 
                       {comments.map((comment) => (
@@ -123,18 +127,20 @@ const LayeredVideoPlayer = ({
                           key={`${comment.comment_id}`}
                           // currentTime={time}
                           comment={comment}
+                          appState={appState}
                         />
                       ))}
 
-                      {/* Video controls */}
-                      {/* <ToolsBar
-                        EditState={EditState}
-                        setEditState={setEditState}
-                        undo={() => { }}
-                        redo={() => { }}
-                        canUndo={true}
-                        canRedo={true}
-                      /> */}
+                      <Match predicate={appState.kind === "edit"}>
+                        <ToolsBar
+                          editState={appState as EditState}
+                          setEditState={setAppState}
+                          undo={() => {}}
+                          redo={() => {}}
+                          canUndo={true}
+                          canRedo={true}
+                        />
+                      </Match>
                     </>
                   )}
                 />
@@ -178,14 +184,3 @@ const CursorTooltip = memo(({ position, children }: CursorTooltipProps) => {
 });
 
 //utils
-
-function getPointerPositionWithinElement(
-  element: HTMLElement,
-  event: PointerEvent<HTMLElement>
-): { x: number; y: number } {
-  const rect = element.getBoundingClientRect();
-  const left = event.clientX - rect.left;
-  const top = event.clientY - rect.top;
-
-  return { x: (left / rect.width) * 100, y: (top / rect.height) * 100 };
-}

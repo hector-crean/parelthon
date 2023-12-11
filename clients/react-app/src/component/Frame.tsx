@@ -1,9 +1,22 @@
-import { EditMode, type EditState } from "@/types";
+import { createComment } from "@/api/comments";
+import { AppState, EditMode } from "@/models/canvas";
+import { CreateVideoComment, VideoComment } from "@/models/comment";
+import { useMutation } from "@tanstack/react-query";
 import { GradientPinkBlue } from "@visx/gradient";
 import { Group } from "@visx/group";
 import { ScaleLinear } from "d3";
-import { motion } from "framer-motion";
-import { ComponentProps, ReactNode, useCallback, useState } from "react";
+import { throttle } from "lodash";
+import {
+  ComponentProps,
+  Dispatch,
+  PointerEvent,
+  ReactNode,
+  SetStateAction,
+  forwardRef,
+  useCallback,
+  useRef,
+} from "react";
+import { v4 as uuidv4 } from "uuid";
 import { Svg } from "./Svg";
 
 enum ZIndex {
@@ -27,12 +40,14 @@ type SvgLayerArgs = {
 type CanvasLayerArgs = {};
 type HtmlLayerArgs = {};
 
-type AudioArgs = {};
-
-interface FrameProps {
+interface FrameProps extends ComponentProps<"div"> {
   width: number;
   height: number;
   aspectRatio: [number, number];
+  setCursorPosition: Dispatch<SetStateAction<{ x: number; y: number }>>;
+  setComments: Dispatch<SetStateAction<Array<VideoComment>>>;
+  time: number;
+  appState: AppState;
   svgLayer: (args: {
     xScale: ScaleLinear<number, number, never>;
     yScale: ScaleLinear<number, number, never>;
@@ -45,19 +60,69 @@ const Frame = ({
   width,
   height,
   aspectRatio,
+  time,
+  appState,
   svgLayer,
   htmlLayer,
   canvasLayer,
+  setCursorPosition,
+  setComments,
+  ...props
 }: FrameProps) => {
-  const [EditState, setState] = useState<EditState>({
-    mode: EditMode.None,
-  });
+  const htmlFrameRef = useRef<HTMLDivElement>(null);
 
   const handleClickOutside = useCallback(() => {}, []);
   const handleMovePointer = useCallback(() => {}, []);
 
+  const handlePointerMove = useCallback(
+    throttle((e: PointerEvent<HTMLDivElement>) => {
+      if (htmlFrameRef.current) {
+        const { x, y } = getPointerPositionWithinElement(
+          htmlFrameRef.current,
+          e
+        );
+        setCursorPosition({ x, y });
+      }
+    }, 100),
+    [htmlFrameRef]
+  );
+
+  const commentsMutation = useMutation({
+    mutationFn: (requestBody: CreateVideoComment) => {
+      return createComment(requestBody);
+    },
+  });
+
+  const handleAddComment = (e: PointerEvent<HTMLDivElement>) => {
+    if (appState.kind === "edit" && appState.mode === EditMode.Inserting) {
+      if (htmlFrameRef.current) {
+        const reqBody: CreateVideoComment = {
+          comment_text: "a comment",
+          coordinates: getPointerPositionWithinElement(htmlFrameRef.current, e),
+          start_time: time,
+          end_time: time + 2,
+        };
+        const comment: VideoComment = {
+          comment_id: uuidv4(),
+          screen_x: reqBody.coordinates.x,
+          screen_y: reqBody.coordinates.y,
+          start_time: reqBody.start_time,
+          end_time: reqBody.end_time,
+          comment_text: reqBody.comment_text,
+          updated_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+        };
+
+        commentsMutation.mutate(reqBody);
+        setComments((prevComments) => {
+          return [...prevComments, comment];
+        });
+      }
+    }
+  };
+
   return (
-    <RelativeContainer zIndex={ZIndex.Zero}>
+    <RelativeContainer zIndex={ZIndex.Zero} {...props}>
       <AbsoluteContainer
         id="svg-container"
         zIndex={ZIndex.Four}
@@ -107,7 +172,10 @@ const Frame = ({
       <AbsoluteContainer
         id="html-container"
         zIndex={ZIndex.Two}
-        style={{ pointerEvents: "all" }}
+        // style={{ pointerEvents: "all" }}
+        ref={htmlFrameRef}
+        onPointerMove={handlePointerMove}
+        onClick={handleAddComment}
       >
         {htmlLayer({})}
       </AbsoluteContainer>
@@ -127,7 +195,7 @@ export { Frame };
 type RelativeContainerProps = {
   zIndex: ZIndex;
   children: ReactNode;
-} & ComponentProps<typeof motion.div>;
+} & ComponentProps<"div">;
 
 const RelativeContainer = ({
   children,
@@ -136,7 +204,7 @@ const RelativeContainer = ({
   ...props
 }: RelativeContainerProps) => {
   return (
-    <motion.div
+    <div
       style={{
         position: "relative",
         display: "flex",
@@ -148,42 +216,47 @@ const RelativeContainer = ({
         zIndex: zIndex,
         ...style,
       }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
       {...props}
     >
       {children}
-    </motion.div>
+    </div>
   );
 };
 
 type AbsoluteContainerProps = {
   zIndex: ZIndex;
   children: ReactNode;
-} & ComponentProps<typeof motion.div>;
+} & React.ComponentPropsWithRef<"div">;
 
-const AbsoluteContainer = ({
-  children,
-  zIndex,
-  style,
-  ...props
-}: AbsoluteContainerProps) => {
-  return (
-    <motion.div
-      style={{
-        position: "absolute",
-        height: "100%",
-        width: "100%",
-        top: 0,
-        left: 0,
-        zIndex: zIndex,
-        ...style,
-      }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  );
-};
+const AbsoluteContainer = forwardRef<HTMLDivElement, AbsoluteContainerProps>(
+  ({ children, zIndex, style, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        style={{
+          position: "absolute",
+          height: "100%",
+          width: "100%",
+          top: 0,
+          left: 0,
+          zIndex: zIndex,
+          ...style,
+        }}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+function getPointerPositionWithinElement(
+  element: HTMLElement,
+  event: PointerEvent<HTMLElement>
+): { x: number; y: number } {
+  const rect = element.getBoundingClientRect();
+  const left = event.clientX - rect.left;
+  const top = event.clientY - rect.top;
+
+  return { x: (left / rect.width) * 100, y: (top / rect.height) * 100 };
+}

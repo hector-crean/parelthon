@@ -1,14 +1,10 @@
 import { EditMode, EditState } from "@/models/canvas";
-import EllipseButton from "./EllipseButton";
-import PencilButton from "./PencilButton";
 import RectangleButton from "./RectangleButton";
-import RedoButton from "./RedoButton";
 import SelectionButton from "./SelectionButton";
-import UndoButton from "./UndoButton";
 import styles from "./index.module.css";
 
 type Props = {
-  EditState: EditState;
+  editState: EditState;
   setEditState: (newState: EditState) => void;
   undo: () => void;
   redo: () => void;
@@ -17,7 +13,7 @@ type Props = {
 };
 
 export default function ToolsBar({
-  EditState,
+  editState,
   setEditState,
   undo,
   redo,
@@ -30,48 +26,52 @@ export default function ToolsBar({
         <div className={styles.tools_panel_section}>
           <SelectionButton
             isActive={
-              EditState.mode === EditMode.None ||
-              EditState.mode === EditMode.Translating ||
-              EditState.mode === EditMode.SelectionNet ||
-              EditState.mode === EditMode.Pressing ||
-              EditState.mode === EditMode.Resizing
+              editState.mode === EditMode.None ||
+              editState.mode === EditMode.Translating ||
+              editState.mode === EditMode.SelectionNet ||
+              editState.mode === EditMode.Pressing ||
+              editState.mode === EditMode.Resizing
             }
-            onClick={() => setEditState({ mode: EditMode.None })}
+            onClick={() => setEditState({ mode: EditMode.None, kind: "edit" })}
           />
-          <PencilButton
-            isActive={EditState.mode === EditMode.Pencil}
-            onClick={() => setEditState({ mode: EditMode.Pencil })}
-          />
+          {/* <PencilButton
+            isActive={editState.mode === EditMode.Pencil}
+            onClick={() =>
+              setEditState({ mode: EditMode.Pencil, kind: "edit" })
+            }
+          /> */}
           <RectangleButton
             isActive={
-              EditState.mode === EditMode.Inserting &&
-              EditState.layerType === "Polygon"
+              editState.mode === EditMode.Inserting &&
+              editState.layerType === "Polygon"
             }
             onClick={() =>
               setEditState({
+                kind: "edit",
                 mode: EditMode.Inserting,
                 layerType: "Polygon",
               })
             }
           />
-          <EllipseButton
+          {/* <EllipseButton
             isActive={
-              EditState.mode === EditMode.Inserting &&
-              EditState.layerType === "Point"
+              editState.mode === EditMode.Inserting &&
+              editState.layerType === "Point"
             }
             onClick={() =>
               setEditState({
+                kind: "edit",
                 mode: EditMode.Inserting,
                 layerType: "Point",
               })
             }
-          />
+          /> */}
         </div>
-        <div className={styles.seperator}></div>
+        {/* <div className={styles.seperator}></div>
         <div className={styles.tools_panel_section}>
           <UndoButton onClick={undo} disabled={!canUndo} />
           <RedoButton onClick={redo} disabled={!canRedo} />
-        </div>
+        </div> */}
       </div>
     </div>
   );

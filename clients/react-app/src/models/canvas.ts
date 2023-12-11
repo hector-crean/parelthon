@@ -88,31 +88,31 @@ enum EditMode {
     /**
      * Default canvas mode. Nothing is happening.
      */
-    None,
+    None = 'None',
     /**
      * When the user's pointer is pressed
      */
-    Pressing,
+    Pressing = 'Pressing',
     /**
      * When the user is selecting multiple layers at once
      */
-    SelectionNet,
+    SelectionNet = 'SelectionNet',
     /**
      * When the user is moving layers
      */
-    Translating,
+    Translating = 'Translating',
     /**
      * When the user is going to insert a Rectangle or an Ellipse
      */
-    Inserting,
+    Inserting = 'Inserting',
     /**
      * When the user is resizing a layer
      */
-    Resizing,
+    Resizing = 'Resizing',
     /**
      * When the pencil is activated
      */
-    Pencil,
+    Pencil = 'Pencil',
 }
 
 
@@ -121,29 +121,36 @@ enum EditMode {
 
 type EditState =
     | {
+        kind: 'edit',
         mode: EditMode.None;
     }
     | {
+        kind: 'edit',
         mode: EditMode.SelectionNet;
         origin: Point;
         current?: Point;
     }
     | {
+        kind: 'edit',
         mode: EditMode.Translating;
         current: Point;
     }
     | {
+        kind: 'edit',
         mode: EditMode.Inserting;
         layerType: FeatureType<'Polygon'> | FeatureType<'Point'>
     }
     | {
+        kind: 'edit',
         mode: EditMode.Pencil;
     }
     | {
+        kind: 'edit',
         mode: EditMode.Pressing;
         origin: Point;
     }
     | {
+        kind: 'edit',
         mode: EditMode.Resizing;
         initialBounds: XYWH;
         corner: Side;
@@ -155,6 +162,7 @@ enum ViewMode {
 }
 
 type ViewState = {
+    kind: 'view',
     mode: ViewMode.None
 }
 

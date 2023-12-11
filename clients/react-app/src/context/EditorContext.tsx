@@ -1,7 +1,7 @@
 import { AppState, EditMode } from "@/models/canvas";
 import { ReactNode, createContext, useContext, useState } from "react";
 
-const DEFAULT_CANVAS_STATE: AppState = { mode: EditMode.None };
+const DEFAULT_CANVAS_STATE: AppState = { kind: "edit", mode: EditMode.None };
 
 interface IAppState {
   appState: AppState;
