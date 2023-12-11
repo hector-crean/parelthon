@@ -105,19 +105,33 @@ const MediaAspectRatioContainer = ({
         justifyContent: "center",
       }}
     >
-      {({ width, height }) => (
-        <AspectRatio
-          maw={`${(width * aw) / ah}px`}
-          mah={`${width / (aw / ah)}px`}
-          w={"100%"}
-        >
-          <ResizeContainer as="div">
-            {({ width: innerWidth, height: innerHeight }) =>
-              children({ width: innerWidth, height: innerHeight })
+      {({ width, height }) => {
+        console.log(aw, ah);
+        console.log(`${(width * aw) / ah}px`);
+
+        return (
+          <AspectRatio
+            ratio={aw / ah}
+            maw={
+              width / height < aw / ah
+                ? `${width}px`
+                : `${(aw / ah) * height}px`
             }
-          </ResizeContainer>
-        </AspectRatio>
-      )}
+            mah={
+              width / height < aw / ah
+                ? `${(ah / aw) * width}px`
+                : `${height}px`
+            }
+            w="100%"
+          >
+            <ResizeContainer as="div">
+              {({ width: innerWidth, height: innerHeight }) =>
+                children({ width: innerWidth, height: innerHeight })
+              }
+            </ResizeContainer>
+          </AspectRatio>
+        );
+      }}
     </ResizeContainer>
   );
 };
@@ -125,8 +139,8 @@ const MediaAspectRatioContainer = ({
 // util types:
 type PropsWithoutChildren<P> = P extends any
   ? "children" extends keyof P
-  ? Omit<P, "children">
-  : P
+    ? Omit<P, "children">
+    : P
   : P;
 
 interface Rect {
@@ -137,4 +151,3 @@ interface Rect {
 }
 
 export { MediaAspectRatioContainer, ResizeContainer };
-

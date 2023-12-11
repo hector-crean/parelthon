@@ -80,74 +80,64 @@ const LayeredVideoPlayer = ({
   return (
     <AnimatePresence>
       {true && (
-        <>
-          <motion.div
-            style={{ width: "100%", height: "100%" }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <MediaAspectRatioContainer aspectRatio={[aw, ah]}>
-              {({ width, height }) => (
-                <Frame
-                  width={width}
-                  height={height}
-                  aspectRatio={[aw, ah]}
-                  setCursorPosition={setCursorPosition}
-                  setComments={setComments}
-                  time={time}
-                  appState={appState}
-                  svgLayer={({ xScale, yScale }) => (
-                    <g>
-                      <OutlinePath
-                        xScale={xScale}
-                        yScale={yScale}
-                        points={dnaOutlineMemoed}
+        <div style={{ width: "100%", height: "100%" }}>
+          <MediaAspectRatioContainer aspectRatio={[aw, ah]}>
+            {({ width, height }) => (
+              <Frame
+                width={width}
+                height={height}
+                aspectRatio={[aw, ah]}
+                setCursorPosition={setCursorPosition}
+                setComments={setComments}
+                time={time}
+                appState={appState}
+                svgLayer={({ xScale, yScale }) => (
+                  <g>
+                    <OutlinePath
+                      xScale={xScale}
+                      yScale={yScale}
+                      points={dnaOutlineMemoed}
+                    />
+                  </g>
+                )}
+                canvasLayer={() => null}
+                htmlLayer={() => (
+                  <>
+                    <CursorTooltip position={cursorPosition}>
+                      {renderCustorContent({
+                        state: appState,
+                        isPlaying: isPlaying,
+                      })}
+                    </CursorTooltip>
+
+                    {/* Video player */}
+                    <Video url={videoPayload.s3_url} audioTracks={soundtrack} />
+
+                    {comments.map((comment) => (
+                      <Label
+                        key={`${comment.comment_id}`}
+                        // currentTime={time}
+                        comment={comment}
+                        appState={appState}
                       />
-                    </g>
-                  )}
-                  canvasLayer={() => null}
-                  htmlLayer={() => (
-                    <>
-                      <CursorTooltip position={cursorPosition}>
-                        {renderCustorContent({
-                          state: appState,
-                          isPlaying: isPlaying,
-                        })}
-                      </CursorTooltip>
+                    ))}
 
-                      {/* Video player */}
-                      <Video
-                        url={videoPayload.s3_url}
-                        audioTracks={soundtrack}
+                    <Match predicate={appState.kind === "edit"}>
+                      <ToolsBar
+                        editState={appState as EditState}
+                        setEditState={setAppState}
+                        undo={() => {}}
+                        redo={() => {}}
+                        canUndo={true}
+                        canRedo={true}
                       />
-
-                      {comments.map((comment) => (
-                        <Label
-                          key={`${comment.comment_id}`}
-                          // currentTime={time}
-                          comment={comment}
-                          appState={appState}
-                        />
-                      ))}
-
-                      <Match predicate={appState.kind === "edit"}>
-                        <ToolsBar
-                          editState={appState as EditState}
-                          setEditState={setAppState}
-                          undo={() => {}}
-                          redo={() => {}}
-                          canUndo={true}
-                          canRedo={true}
-                        />
-                      </Match>
-                    </>
-                  )}
-                />
-              )}
-            </MediaAspectRatioContainer>
-          </motion.div>
-        </>
+                    </Match>
+                  </>
+                )}
+              />
+            )}
+          </MediaAspectRatioContainer>
+        </div>
       )}
     </AnimatePresence>
   );

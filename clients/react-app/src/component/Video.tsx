@@ -81,7 +81,8 @@ const Video = ({ url, audioTracks = [], ...props }: VideoProps) => {
         muted={true}
         ref={playerRef}
         width="100%"
-        height="auto"
+        height={"100%"}
+        style={{ objectFit: "cover" }}
         playing={isPlaying}
         onDuration={setDuration}
         onProgress={handleProgress}

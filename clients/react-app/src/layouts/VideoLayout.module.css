@@ -66,6 +66,7 @@
   }
 
   .video_player_wrapper {
+    background-color: black;
     grid-area: video_player_wrapper;
     width: 100%;
     height: 100%;

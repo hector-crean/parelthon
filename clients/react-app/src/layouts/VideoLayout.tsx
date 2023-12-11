@@ -1,12 +1,10 @@
 "use-client";
 
-import { SlimNavbar } from "@/component/SlimNavbar";
 import { exitFullscreenIconPath } from "@/icons/ExitFullscreen";
 import { fullscreenIconPath } from "@/icons/Fullscreen";
-import clsx from "clsx";
 import { motion } from "framer-motion";
 import { ReactNode, useState } from "react";
-import styles from "./VideoLayout.module.css";
+import styles from "./VideoChapter.module.css";
 
 const drawPath = {
   hidden: { pathLength: 0, opacity: 0 },
@@ -55,7 +53,7 @@ export function EnterExitFullscreenIcon({
         strokeWidth={"10px"}
         strokeLinecap={"round"}
         stroke={"transparent"}
-        fill="black"
+        fill="white"
       />
     </motion.svg>
   );
@@ -127,46 +125,32 @@ const VideoLayout = ({ video, sidebar, expandingFooter }: VideoLayoutProps) => {
   const [overviewExpanded, setOverviewExpanded] = useState(false);
 
   return (
-    <div className={styles.layout_grid_wrapper}>
-      <div className={styles.layout_grid_inner}>
-        <div
-          className={clsx(
-            styles.grid_item,
-            styles.vertical_slim_navbar_wrapper
-          )}
-        >
-          <SlimNavbar orientation="vertical" />
-        </div>
-
-        <div className={clsx(styles.grid_item, styles.video_player_wrapper)}>
+    <div className={styles.video_chapter_page_container}>
+      <div className={styles.main_container}>
+        <div className={styles.video_player_wrapper}>
           {video}
           <Coverup />
         </div>
-
-        <div className={clsx(styles.grid_item, styles.sidebar_wrapper)}>
-          {/* <Tabs initialTabs={tabs} /> */}
-          {sidebar}
-        </div>
-
-        <motion.div
-          className={clsx(styles.grid_item, styles.overview_wrapper)}
-          data-expanded={overviewExpanded}
-          onPointerDown={() => setOverviewExpanded(!overviewExpanded)}
-          layout
-        >
-          <motion.div
-            className="handle"
-            layout
-            transition={{
-              type: "spring",
-              stiffness: 700,
-              damping: 30,
-            }}
-          >
-            {expandingFooter}
-          </motion.div>
-        </motion.div>
       </div>
+
+      <motion.div
+        className={styles.overview_wrapper}
+        data-expanded={overviewExpanded}
+        onPointerDown={() => setOverviewExpanded(!overviewExpanded)}
+        layout
+      >
+        <motion.div
+          className="handle"
+          layout
+          transition={{
+            type: "spring",
+            stiffness: 700,
+            damping: 30,
+          }}
+        >
+          {expandingFooter}
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
