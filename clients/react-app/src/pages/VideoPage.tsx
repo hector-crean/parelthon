@@ -1,4 +1,5 @@
 import { getVideoWithCommentsByVideoId } from "@/api/comments";
+import { CommentThread } from "@/component/CommentThread";
 import { LayeredVideoPlayer } from "@/component/LayeredVideoPlayer";
 import { QueryResult } from "@/component/QueryResult";
 import { Tabable, Tabs } from "@/component/tabs/Tabs";
@@ -74,7 +75,9 @@ const VideoPage = () => {
             id: "tab-2",
             label: "Tab 2",
             icon: <PauseIcon />,
-            tabBody: "This is the tab body",
+            tabBody: (
+              <CommentThread comments={comments} timeActiveCommentIds={[]} />
+            ),
           },
         ] satisfies Array<Tabable>;
 

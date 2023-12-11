@@ -126,6 +126,7 @@ export function Tabs<T extends Tabable>({ initialTabs }: TabsProps<T>) {
             initial={{ opacity: 0, y: 20 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.15 }}
+            style={{ width: "100%", height: "100%" }}
           >
             {selectedTab ? selectedTab.tabBody : "😋"}
           </motion.div>

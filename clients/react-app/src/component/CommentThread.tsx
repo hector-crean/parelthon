@@ -36,7 +36,10 @@ const CommentThread = ({
           key={`${comment.comment_id}`}
         >
           <Accordion.Control>{comment.comment_id}</Accordion.Control>
-          <Accordion.Panel>panel-1</Accordion.Panel>
+          <Accordion.Panel>
+            <p>{comment.comment_text}</p>
+            <p>{`[start-end]:[${comment.start_time}-${comment.end_time}]`}</p>
+          </Accordion.Panel>
         </Accordion.Item>
       ))}
     </Accordion>
