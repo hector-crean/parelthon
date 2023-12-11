@@ -1,30 +1,16 @@
 import { CrossIcon } from "@/icons/CrossIcon";
-import { PauseIcon } from "@/icons/Pause";
-import { PlayIcon } from "@/icons/Play";
 import { PlusIcon } from "@/icons/PlusIcon";
 import { AnimatePresence, motion, Reorder } from "framer-motion";
 import { ReactNode, useState } from "react";
 import styles from "./tabs.module.css";
 
-export const tabs = [
-  {
-    id: "tab-1",
-    label: "Tab 1",
-    icon: <PlayIcon />,
-  },
-  {
-    id: "tab-2",
-    label: "Tab 2",
-    icon: <PauseIcon />,
-  },
-] satisfies Array<Tabable>;
-
 ///
 
-interface Tabable {
+export interface Tabable {
   id: string;
   label: string;
   icon: ReactNode;
+  tabBody: ReactNode;
 }
 interface Props<T extends Tabable> {
   item: T;
@@ -89,16 +75,26 @@ export function Tabs<T extends Tabable>({ initialTabs }: TabsProps<T>) {
     }
     setTabs(removeItem(tabs, tab));
   };
-  const addTabHandler = () => {};
+  const addTabHandler = () => {
+    const candidates = initialTabs.filter(
+      (tab) => tabs.findIndex((activeTab) => activeTab.id === tab.id) === -1
+    );
+    if (candidates.length >= 1) {
+      setTabs((tabs) => [...tabs, candidates[0]]);
+      if (tabs.length === 0) {
+        setSelectedTab(candidates[0]);
+      }
+    }
+  };
 
   return (
-    <div className={styles["tabs_container"]}>
-      <nav>
+    <div className={styles.tabs_container}>
+      <nav className={styles.tab_header_container}>
         <Reorder.Group
           as="ul"
           axis="x"
           onReorder={setTabs}
-          className={styles["tabs"]}
+          className={styles.tab_headers_group}
           values={tabs}
         >
           <AnimatePresence initial={false}>
@@ -114,7 +110,7 @@ export function Tabs<T extends Tabable>({ initialTabs }: TabsProps<T>) {
           </AnimatePresence>
         </Reorder.Group>
         <motion.button
-          className={styles["add-item"]}
+          className={styles.add_item}
           onClick={addTabHandler}
           disabled={tabs.length === initialTabs.length}
           whileTap={{ scale: 0.9 }}
@@ -122,7 +118,7 @@ export function Tabs<T extends Tabable>({ initialTabs }: TabsProps<T>) {
           <PlusIcon />
         </motion.button>
       </nav>
-      <main>
+      <main className={styles.tabs_main}>
         <AnimatePresence mode="wait">
           <motion.div
             key={selectedTab ? selectedTab.label : "empty"}
@@ -131,7 +127,7 @@ export function Tabs<T extends Tabable>({ initialTabs }: TabsProps<T>) {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.15 }}
           >
-            {selectedTab ? selectedTab.icon : "😋"}
+            {selectedTab ? selectedTab.tabBody : "😋"}
           </motion.div>
         </AnimatePresence>
       </main>
