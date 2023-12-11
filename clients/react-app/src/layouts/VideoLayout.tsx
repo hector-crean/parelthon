@@ -131,6 +131,7 @@ const VideoLayout = ({ video, sidebar, expandingFooter }: VideoLayoutProps) => {
           {video}
           <Coverup />
         </div>
+        <div className={styles.video_sidepanel}>{sidebar}</div>
       </div>
 
       <motion.div
@@ -138,18 +139,13 @@ const VideoLayout = ({ video, sidebar, expandingFooter }: VideoLayoutProps) => {
         data-expanded={overviewExpanded}
         onPointerDown={() => setOverviewExpanded(!overviewExpanded)}
         layout
+        transition={{
+          type: "spring",
+          stiffness: 700,
+          damping: 30,
+        }}
       >
-        <motion.div
-          className="handle"
-          layout
-          transition={{
-            type: "spring",
-            stiffness: 700,
-            damping: 30,
-          }}
-        >
-          {expandingFooter}
-        </motion.div>
+        {expandingFooter}
       </motion.div>
     </div>
   );

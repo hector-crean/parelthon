@@ -1,6 +1,7 @@
 import { getVideoWithCommentsByVideoId } from "@/api/comments";
 import { LayeredVideoPlayer } from "@/component/LayeredVideoPlayer";
 import { QueryResult } from "@/component/QueryResult";
+import { Tabs, tabs } from "@/component/tabs/Tabs";
 import { AppStateProvider } from "@/context/EditorContext";
 import { StageProvider } from "@/context/StageContext";
 import { VideoLayout } from "@/layouts/VideoLayout";
@@ -76,12 +77,12 @@ const VideoPage = () => {
                     prevVideo={wrappedArrayLookup(videos, videoIdx - 1)}
                   />
                 }
-                sidebar={<div></div>}
+                sidebar={<Tabs initialTabs={tabs} />}
                 expandingFooter={
-                  <section id="video-overview">
-                    <h1>{video.title}</h1>
-                    <h2>{video.created_at}</h2>
-                  </section>
+                  <>
+                    <div>Video Title 1</div>
+                    <div>{video.video_id}</div>
+                  </>
                 }
               />
             </StageProvider>
