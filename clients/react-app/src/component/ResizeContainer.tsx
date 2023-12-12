@@ -106,8 +106,7 @@ const MediaAspectRatioContainer = ({
       }}
     >
       {({ width, height }) => {
-        console.log(aw, ah);
-        console.log(`${(width * aw) / ah}px`);
+
 
         return (
           <AspectRatio
@@ -139,8 +138,8 @@ const MediaAspectRatioContainer = ({
 // util types:
 type PropsWithoutChildren<P> = P extends any
   ? "children" extends keyof P
-    ? Omit<P, "children">
-    : P
+  ? Omit<P, "children">
+  : P
   : P;
 
 interface Rect {

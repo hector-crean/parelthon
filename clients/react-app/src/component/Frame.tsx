@@ -41,6 +41,7 @@ type CanvasLayerArgs = {};
 type HtmlLayerArgs = {};
 
 interface FrameProps extends ComponentProps<"div"> {
+  videoId: string,
   width: number;
   height: number;
   aspectRatio: [number, number];
@@ -57,6 +58,7 @@ interface FrameProps extends ComponentProps<"div"> {
 }
 
 const Frame = ({
+  videoId,
   width,
   height,
   aspectRatio,
@@ -71,8 +73,8 @@ const Frame = ({
 }: FrameProps) => {
   const htmlFrameRef = useRef<HTMLDivElement>(null);
 
-  const handleClickOutside = useCallback(() => {}, []);
-  const handleMovePointer = useCallback(() => {}, []);
+  const handleClickOutside = useCallback(() => { }, []);
+  const handleMovePointer = useCallback(() => { }, []);
 
   const handlePointerMove = useCallback(
     throttle((e: PointerEvent<HTMLDivElement>) => {
@@ -97,12 +99,14 @@ const Frame = ({
     if (appState.kind === "edit" && appState.mode === EditMode.Inserting) {
       if (htmlFrameRef.current) {
         const reqBody: CreateVideoComment = {
+          video_id: videoId,
           comment_text: "a comment",
           coordinates: getPointerPositionWithinElement(htmlFrameRef.current, e),
           start_time: time,
           end_time: time + 2,
         };
         const comment: VideoComment = {
+          video_id: reqBody.video_id,
           comment_id: uuidv4(),
           screen_x: reqBody.coordinates.x,
           screen_y: reqBody.coordinates.y,
@@ -146,8 +150,8 @@ const Frame = ({
                 fill="transparent"
                 onPointerMove={handleMovePointer}
                 onPointerLeave={handleClickOutside}
-                // onPointerDown={handleClickOutside}
-                // onPointerMove={handleMovePointer}
+              // onPointerDown={handleClickOutside}
+              // onPointerMove={handleMovePointer}
               />
               {/* background */}
               <rect
@@ -158,8 +162,8 @@ const Frame = ({
                 fill={`url(#${BG_PATTERN_ID})`}
                 fillOpacity={0.3}
                 pointerEvents={"none"}
-                //   animate={{ stdDeviation: isHovered ? 0 : 10 }}
-                // filter="url(#my-filter)"
+              //   animate={{ stdDeviation: isHovered ? 0 : 10 }}
+              // filter="url(#my-filter)"
               />
 
               <Group top={margin.top} left={margin.left}>

@@ -121,6 +121,7 @@ export function Tabs<T extends Tabable>({ initialTabs }: TabsProps<T>) {
       <main className={styles.tabs_main}>
         <AnimatePresence mode="wait">
           <motion.div
+            id='tab-body-content-container'
             key={selectedTab ? selectedTab.label : "empty"}
             animate={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 20 }}

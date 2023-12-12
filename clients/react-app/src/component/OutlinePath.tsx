@@ -151,7 +151,6 @@ const OutlinePath = ({
 
 
             onPointerEnter={() => {
-              console.log('entering')
               setHovered(true)
             }}
 

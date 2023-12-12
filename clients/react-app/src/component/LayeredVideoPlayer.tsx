@@ -7,9 +7,9 @@ import { ReactNode, memo, useMemo, useState } from "react";
 import { Video } from "@/component/Video";
 import { useAppContext } from "@/context/EditorContext";
 import { useStageContext } from "@/context/StageContext";
-import { Audio } from "@/models/audio";
 import { AppState, EditState } from "@/models/canvas";
 import type { Video as IVideo } from "@/models/video";
+import { VideoSection } from "@/models/video-section";
 import { Frame } from "./Frame";
 import styles from "./LayeredVideoPlayer.module.css";
 import { Match } from "./Match";
@@ -25,22 +25,25 @@ export enum VideoPlayerMode {
 }
 
 type LayeredVideoPlayerProps = {
+  videoId: string,
   videoPayload: IVideo;
-  videoComments: Array<VideoComment>;
   changeVideo: (videoId: string) => void;
   nextVideo: IVideo;
   prevVideo: IVideo;
-  soundtrack: Array<Audio>;
+  videoSections: Array<VideoSection>
 };
 
 const LayeredVideoPlayer = ({
+  videoId,
   videoPayload,
-  videoComments,
   changeVideo,
   nextVideo,
-  soundtrack,
+  videoSections
 }: LayeredVideoPlayerProps) => {
   //refs
+
+  const soundtrack = useMemo(() => videoSections.flatMap(section => section.audioItems), [videoSections])
+  const videoComments = useMemo(() => videoSections.flatMap(section => section.labels), [videoSections])
 
   const { appState, setAppState } = useAppContext();
 
@@ -84,6 +87,7 @@ const LayeredVideoPlayer = ({
           <MediaAspectRatioContainer aspectRatio={[aw, ah]}>
             {({ width, height }) => (
               <Frame
+                videoId={videoId}
                 width={width}
                 height={height}
                 aspectRatio={[aw, ah]}
@@ -126,8 +130,8 @@ const LayeredVideoPlayer = ({
                       <ToolsBar
                         editState={appState as EditState}
                         setEditState={setAppState}
-                        undo={() => {}}
-                        redo={() => {}}
+                        undo={() => { }}
+                        redo={() => { }}
                         canUndo={true}
                         canRedo={true}
                       />

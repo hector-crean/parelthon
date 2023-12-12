@@ -2,17 +2,20 @@ import { getVideoWithCommentsByVideoId } from "@/api/comments";
 import { CommentThread } from "@/component/CommentThread";
 import { LayeredVideoPlayer } from "@/component/LayeredVideoPlayer";
 import { QueryResult } from "@/component/QueryResult";
-import { Tabable, Tabs } from "@/component/tabs/Tabs";
-import { AppStateProvider } from "@/context/EditorContext";
-import { StageProvider } from "@/context/StageContext";
+import { ScrollTimeline } from "@/component/ScrollTimeline";
+import { Tabs } from "@/component/tabs/Tabs";
+import { useStageContext } from "@/context/StageContext";
+import { videoSections } from '@/data/video-sections';
 import { PauseIcon } from "@/icons/Pause";
 import { PlayIcon } from "@/icons/Play";
 import { VideoLayout } from "@/layouts/VideoLayout";
-import { audiosExample } from "@/models/audio";
 import { RoutePath } from "@/routes";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { create } from "zustand";
+
+
+
 
 function wrappedArrayLookup<T>(arr: T[], index: number): T {
   const length = arr.length;
@@ -59,54 +62,67 @@ const VideoPage = () => {
     queryFn: () => getVideoWithCommentsByVideoId(videoId),
   });
 
+  const { time, setTime } = useStageContext()
+
   return (
     <QueryResult queryResult={getVideoWithCommentsQuery}>
       {({ data: { video, comments, videos } }) => {
         const videoIdx = videos.findIndex((v) => v.video_id === video.video_id);
 
-        const tabs = [
-          {
-            id: "tab-1",
-            label: "Tab 1",
-            icon: <PlayIcon />,
-            tabBody: "This is the tab body",
-          },
-          {
-            id: "tab-2",
-            label: "Tab 2",
-            icon: <PauseIcon />,
-            tabBody: (
-              <CommentThread comments={comments} timeActiveCommentIds={[]} />
-            ),
-          },
-        ] satisfies Array<Tabable>;
-
         return (
-          <AppStateProvider>
-            <StageProvider>
-              <VideoLayout
-                video={
-                  <LayeredVideoPlayer
-                    videoPayload={video}
-                    videoComments={comments}
-                    changeVideo={(videoId: string) =>
-                      setLocation(`/videos/${videoId}`)
-                    }
-                    soundtrack={audiosExample}
-                    nextVideo={wrappedArrayLookup(videos, videoIdx + 1)}
-                    prevVideo={wrappedArrayLookup(videos, videoIdx - 1)}
-                  />
+
+          <VideoLayout
+            video={
+              <LayeredVideoPlayer
+                videoId={videoId}
+                videoPayload={video}
+                changeVideo={(videoId: string) =>
+                  setLocation(`/videos/${videoId}`)
                 }
-                sidebar={<Tabs initialTabs={tabs} />}
-                expandingFooter={
-                  <>
-                    <div>Video Title 1</div>
-                    <div>{video.video_id}</div>
-                  </>
-                }
+                videoSections={videoSections}
+                nextVideo={wrappedArrayLookup(videos, videoIdx + 1)}
+                prevVideo={wrappedArrayLookup(videos, videoIdx - 1)}
               />
-            </StageProvider>
-          </AppStateProvider>
+            }
+            sidebar={
+              <Tabs initialTabs={
+                [
+
+                  {
+                    id: "tab-2",
+                    label: "Tab 2",
+                    icon: <PauseIcon />,
+                    tabBody: (
+                      <CommentThread comments={comments} timeActiveCommentIds={[]} selectedCommentId={''} />
+                    ),
+                  },
+                  {
+                    id: "tab-3",
+                    label: "Timeline",
+                    icon: <PlayIcon />,
+                    tabBody: (
+                      <ScrollTimeline
+                        sections={videoSections}
+                        renderSection={(props) => <div>{props.audioItems.map(item => (<div>{item.id}</div>))}</div>}
+                        onScroll={(progress) => {
+                          setTime(progress * 9)
+                        }}
+                        progress={time / 9}
+
+                        onSelectSection={() => { }}
+                      />
+                    ),
+                  },
+                ]
+              } />}
+            expandingFooter={
+              <>
+                <div>Video Title 1</div>
+                <div>{video.video_id}</div>
+              </>
+            }
+          />
+
         );
       }}
     </QueryResult>
