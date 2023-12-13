@@ -1,21 +1,19 @@
 import { getVideoWithCommentsByVideoId } from "@/api/comments";
+import { AudioTrack } from "@/component/AudioTrack";
 import { CommentThread } from "@/component/CommentThread";
 import { LayeredVideoPlayer } from "@/component/LayeredVideoPlayer";
 import { QueryResult } from "@/component/QueryResult";
 import { ScrollTimeline } from "@/component/ScrollTimeline";
 import { Tabs } from "@/component/tabs/Tabs";
-import { useStageContext } from "@/context/StageContext";
-import { videoSections } from '@/data/video-sections';
+import { videoSections } from "@/data/video-sections";
 import { PauseIcon } from "@/icons/Pause";
 import { PlayIcon } from "@/icons/Play";
 import { VideoLayout } from "@/layouts/VideoLayout";
 import { RoutePath } from "@/routes";
+import { useVideoStageStore } from "@/stores/stage.store";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { create } from "zustand";
-
-
-
 
 function wrappedArrayLookup<T>(arr: T[], index: number): T {
   const length = arr.length;
@@ -62,7 +60,7 @@ const VideoPage = () => {
     queryFn: () => getVideoWithCommentsByVideoId(videoId),
   });
 
-  const { time, setTime } = useStageContext()
+  const store = useVideoStageStore();
 
   return (
     <QueryResult queryResult={getVideoWithCommentsQuery}>
@@ -70,7 +68,6 @@ const VideoPage = () => {
         const videoIdx = videos.findIndex((v) => v.video_id === video.video_id);
 
         return (
-
           <VideoLayout
             video={
               <LayeredVideoPlayer
@@ -85,15 +82,18 @@ const VideoPage = () => {
               />
             }
             sidebar={
-              <Tabs initialTabs={
-                [
-
+              <Tabs
+                initialTabs={[
                   {
                     id: "tab-2",
                     label: "Tab 2",
                     icon: <PauseIcon />,
                     tabBody: (
-                      <CommentThread comments={comments} timeActiveCommentIds={[]} selectedCommentId={''} />
+                      <CommentThread
+                        comments={comments}
+                        timeActiveCommentIds={[]}
+                        selectedCommentId={""}
+                      />
                     ),
                   },
                   {
@@ -103,18 +103,53 @@ const VideoPage = () => {
                     tabBody: (
                       <ScrollTimeline
                         sections={videoSections}
-                        renderSection={(props) => <div>{props.audioItems.map(item => (<div>{item.id}</div>))}</div>}
+                        renderSection={(props) => (
+                          <>
+                            {props.audioItems.map((audioItem, i) => (
+                              <AudioTrack
+                                key={`item-${i}`}
+                                track={audioItem}
+                                muted={true}
+                                style={{ width: "100%", height: "200px" }}
+                                visualiserVisible={true}
+                              />
+                            ))}
+                          </>
+                        )}
                         onScroll={(progress) => {
-                          setTime(progress * 9)
-                        }}
-                        progress={time / 9}
+                          store.setIsPlaying(true);
+                          const timeThrough = progress * store.duration;
+                          const vsections = videoSections.flatMap(
+                            (s) => s.audioItems
+                          );
 
-                        onSelectSection={() => { }}
+                          const sorted = [...vsections].sort((a, b) =>
+                            Math.abs(timeThrough - a.iv.start) >
+                            Math.abs(timeThrough - b.iv.start)
+                              ? -1
+                              : Math.abs(timeThrough - a.iv.start) <
+                                Math.abs(timeThrough - b.iv.start)
+                              ? 1
+                              : 0
+                          );
+
+                          console.log(sorted);
+
+                          store.setTime(sorted[0].iv.start);
+                          store.setTimeIsSynced(false);
+                        }}
+                        progress={store.time / store.duration}
+                        onSelectSection={(section) => {
+                          store.setIsPlaying(true);
+                          store.setTime(section.iv.start);
+                          store.setTimeIsSynced(false);
+                        }}
                       />
                     ),
                   },
-                ]
-              } />}
+                ]}
+              />
+            }
             expandingFooter={
               <>
                 <div>Video Title 1</div>
@@ -122,7 +157,6 @@ const VideoPage = () => {
               </>
             }
           />
-
         );
       }}
     </QueryResult>

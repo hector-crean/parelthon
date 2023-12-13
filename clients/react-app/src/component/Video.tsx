@@ -1,27 +1,18 @@
-import { useStageContext } from "@/context/StageContext";
-import { Audio } from "@/models/audio";
+import { VideoAudioItem } from "@/models/video-audio";
+import { useVideoStageStore } from "@/stores/stage.store";
 import { ComponentProps, useCallback, useEffect, useRef } from "react";
 import ReactPlayer from "react-player";
 import { OnProgressProps } from "react-player/base";
 import { AudioTimeBar } from "./AudioTimeBar";
 import styles from "./Video.module.css";
 
-type VideoProps = { url: string; audioTracks: Array<Audio> } & ComponentProps<
-  typeof ReactPlayer
->;
+type VideoProps = {
+  url: string;
+  audioTracks: Array<VideoAudioItem>;
+} & ComponentProps<typeof ReactPlayer>;
 
 const Video = ({ url, audioTracks = [], ...props }: VideoProps) => {
-  const {
-    time,
-    setTime,
-    duration,
-    isPlaying,
-    setIsPlaying,
-    setDuration,
-    setIsSeeking,
-    isSeeking,
-    setAspectRatio,
-  } = useStageContext();
+  const store = useVideoStageStore();
 
   const playerRef = useRef<ReactPlayer>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -30,30 +21,16 @@ const Video = ({ url, audioTracks = [], ...props }: VideoProps) => {
 
   const handleProgress = useCallback(
     (progress: OnProgressProps) => {
-      if (!isSeeking) {
-        setTime(progress.playedSeconds);
+      if (!store.isSeeking) {
+        store.setTime(progress.playedSeconds);
       }
     },
-    [isSeeking]
+    [store.isSeeking]
   );
 
-  // On seek, update UI time
-  const handleSliderChange = useCallback((value: number) => {
-    setIsSeeking(true);
-    setTime(value);
-  }, []);
-
-  // On end seeking, update UI time and update video time
-  const handleSliderCommit = useCallback((value: number) => {
-    setTime(value);
-    if (playerRef.current) {
-      playerRef.current.seekTo(value, "seconds");
-    }
-    setIsSeeking(false);
-  }, []);
-
   const handleEnded = useCallback(() => {
-    setIsPlaying(false);
+    store.setTime(store.duration);
+    store.setIsPlaying(false);
   }, []);
 
   useEffect(() => {
@@ -65,16 +42,23 @@ const Video = ({ url, audioTracks = [], ...props }: VideoProps) => {
           // Get the intrinsic width and height of the video
           const intrinsicWidth = videoRef.videoWidth;
           const intrinsicHeight = videoRef.videoHeight;
-          setAspectRatio([intrinsicWidth, intrinsicHeight]);
+          store.setAspectRatio([intrinsicWidth, intrinsicHeight]);
         }
       }
     }
   }, []);
 
+  useEffect(() => {
+    if (playerRef.current) {
+      playerRef.current.seekTo(store.time, "seconds");
+    }
+    store.setTimeIsSynced(true);
+  }, [store.timeIsSynced === true]);
+
   return (
     <div
       className={styles.player_wrapper}
-      onClick={() => setIsPlaying(!isPlaying)}
+      onClick={() => store.togglePlayPause()}
       ref={wrapperRef}
     >
       <ReactPlayer
@@ -83,26 +67,20 @@ const Video = ({ url, audioTracks = [], ...props }: VideoProps) => {
         width="100%"
         height={"100%"}
         style={{ objectFit: "cover" }}
-        playing={isPlaying}
-        onDuration={setDuration}
+        playing={store.isPlaying}
+        onDuration={store.setDuration}
         onProgress={handleProgress}
-        progressInterval={200}
+        progressInterval={100}
         onEnded={handleEnded}
+        // onBuffer={() => store.setMode({ mode: "buffering" })}
+        // onBufferEnd={() => store.setMode({ mode: "paused" })}
+        // onReady={() => store.setIsPlaying(true)}
         url={url}
         className={styles.react_player}
         {...props}
       />
       <div className={styles.timebar}>
-        <AudioTimeBar
-          time={time}
-          handleSliderChange={handleSliderChange}
-          handleSliderCommit={handleSliderCommit}
-          duration={duration}
-          isPlaying={isPlaying}
-          setIsPlaying={setIsPlaying}
-          isSeeking={isSeeking}
-          audioTracks={audioTracks}
-        />
+        <AudioTimeBar audioTracks={audioTracks} />
       </div>
     </div>
   );

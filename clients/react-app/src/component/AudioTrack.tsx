@@ -1,33 +1,37 @@
 import { useAudioNode } from "@/hooks/nodes";
-import { Audio } from "@/models/audio";
 import { Interval } from "@/models/interval";
-import { motion } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { VideoAudioItem } from "@/models/video-audio";
+import { useVideoStageStore } from "@/stores/stage.store";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import * as sac from "standardized-audio-context";
 import { useAudioContextContext } from "../context/Audio";
 import styles from "./AudioTrack.module.css";
 import { FftDomain, Visualiser } from "./audio-nodes/Analyser/Visualiser";
 
-interface AudioTrackProps {
-  isPlaying: boolean;
-  isSeeking: boolean;
+interface AudioTrackProps extends ComponentProps<typeof motion.div> {
   muted: boolean;
-  track: Audio;
-  //this is the master time (i.e. that of the video)
-  videoTime: number;
-  videoDuration: number;
+  track: VideoAudioItem;
+  visualiserVisible: boolean;
 }
 
 export const AudioTrack = ({
-  isPlaying,
-  isSeeking,
   muted,
   track: { iv, src, id },
-  videoTime,
-  videoDuration,
+  visualiserVisible,
+  ...props
 }: AudioTrackProps) => {
-  const [audioIsPlaying, setAudioIsPlaying] = useState(false);
+  const store = useVideoStageStore();
   const audioContext = useAudioContextContext();
+
+  const [audioIsPlaying, setAudioIsPlaying] = useState(false);
   const [audioBuf, setAudioBuf] = useState<sac.AudioBuffer | null>(null);
   const bufferSourceNodeRef =
     useRef<sac.AudioBufferSourceNode<sac.AudioContext> | null>(null);
@@ -42,7 +46,19 @@ export const AudioTrack = ({
     [src]
   );
 
-  // Combine fetching and decoding audio into a separate function
+  //mute the sound (by setting gain node to zero) if muting is enabled
+  //This is useful if we want to visualise the sounds, but not hear it
+  // useEffect(
+  //   () =>
+  //     void gainNode.gain.setTargetAtTime(
+  //       muted === true ? 0 : 1,
+  //       audioContext.currentTime,
+  //       0.015
+  //     ),
+  //   [gainNode, muted]
+  // );
+
+  // Fetch and decode audio
   useEffect(() => {
     let isCancelled = false;
 
@@ -72,14 +88,23 @@ export const AudioTrack = ({
     };
   }, [src, audioContext]);
 
+  // Connect audio nodes
   useEffect(() => {
     gainNode.connect(analyserNode);
     analyserNode.connect(audioContext.destination);
     return () => {
-      gainNode.disconnect();
+      // Disconnect nodes in the reverse order of connection
       analyserNode.disconnect();
+      gainNode.disconnect();
     };
   }, [gainNode, analyserNode, audioContext]);
+
+  useEffect(() => {
+    analyserNode.disconnect(audioContext.destination);
+  }, [muted == true]);
+  useEffect(() => {
+    analyserNode.connect(audioContext.destination);
+  }, [muted == false]);
 
   const relinkAndPlayBufferSource = useCallback(
     (
@@ -95,64 +120,96 @@ export const AudioTrack = ({
     [audioBuf, gainNode]
   );
 
+  type Action = { type: "play"; time: number } | { type: "pause" };
+
   const handleAction = useCallback(
-    (action: "play" | "pause", time?: number) => {
-      if (action === "play" && time !== undefined) {
-        const bufferSource = audioContext.createBufferSource();
-        const dt = clamp(0, iv.end, time - iv.start);
-        relinkAndPlayBufferSource(bufferSource, dt);
-      } else if (action === "pause") {
-        bufferSourceNodeRef.current?.stop();
+    (action: Action) => {
+      switch (action.type) {
+        case "play":
+          const bufferSource = audioContext.createBufferSource();
+          const dt = clamp(0, iv.end, action.time - iv.start);
+          relinkAndPlayBufferSource(bufferSource, dt);
+          break;
+        case "pause":
+          try {
+            bufferSourceNodeRef.current?.stop();
+          } catch (e) {
+            console.log(
+              "audio node could not be stopped, perhaps because it has not been started"
+            );
+          }
+          break;
       }
     },
     [relinkAndPlayBufferSource, iv, audioContext]
   );
 
   const inInterval = useMemo(
-    () => intervalPredicateFn(videoTime, iv),
-    [videoTime, iv]
+    () => intervalPredicateFn(store.time, iv),
+    [store.time, iv]
   );
 
+  // Check if we should play or pause the audio based on time and state
   useEffect(() => {
-    if (inInterval && isPlaying) {
-      if (!audioIsPlaying || isSeeking) {
-        handleAction("play", videoTime);
-        setAudioIsPlaying(true);
-      }
-    } else if (audioIsPlaying) {
-      handleAction("pause");
+    const shouldPlay = inInterval && store.isPlaying;
+
+    if (shouldPlay && !audioIsPlaying) {
+      handleAction({ type: "play", time: store.time });
+      setAudioIsPlaying(true);
+    } else if (!shouldPlay && audioIsPlaying) {
+      handleAction({ type: "pause" });
       setAudioIsPlaying(false);
     }
   }, [
     inInterval,
-    isPlaying,
-    isSeeking,
+    store.isPlaying,
+    store.isSeeking,
     audioIsPlaying,
     handleAction,
-    videoTime,
+    store.time,
   ]);
 
   return (
     <motion.div
-      className={styles.container}
+      className={styles.audiotrack_container}
+      onClick={() => {
+        store.setIsPlaying(true);
+        store.setTime(iv.start);
+        store.setTimeIsSynced(false);
+      }}
       whileHover={{
         backgroundColor: "red",
         transition: { duration: 1 },
       }}
       whileTap={{ backgroundColor: "red" }}
-      style={{
-        height: "100%",
-        position: "absolute",
-        left: `${(iv.start / videoDuration) * 100}%`,
-        width: `${((iv.end - iv.start) / videoDuration) * 100}%`,
-      }}
+      {...props}
     >
-      <Visualiser
-        node={analyserNode}
-        paused={!isPlaying}
-        type={FftDomain.TimeDomain}
-        fillColor="blue"
-      />
+      <div className={styles.relative_container}>
+        <div className={styles.audiotrack_label}>{id}</div>
+        <AnimatePresence>
+          {visualiserVisible && (
+            <Visualiser
+              node={analyserNode}
+              paused={!store.isPlaying}
+              type={FftDomain.TimeDomain}
+              fillColor="#398ae6"
+              containerProps={{
+                style: {
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+              }}
+            />
+          )}
+        </AnimatePresence>
+      </div>
     </motion.div>
   );
 };

@@ -11,7 +11,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Route, Switch } from "wouter";
 import { AudioContextContextProvider } from "./context/Audio";
 import { AppStateProvider } from "./context/EditorContext";
-import { StageProvider } from "./context/StageContext";
 import { routes } from "./routes";
 
 const theme = createTheme({
@@ -37,15 +36,13 @@ const App = () => {
     <MantineProvider theme={theme}>
       <AudioContextContextProvider>
         <AppStateProvider>
-          <StageProvider>
-            <QueryClientProvider client={queryClient}>
-              <Switch>
-                {routes.map(({ path, component }) => (
-                  <Route key={`${path}`} path={path} component={component} />
-                ))}
-              </Switch>
-            </QueryClientProvider>
-          </StageProvider>
+          <QueryClientProvider client={queryClient}>
+            <Switch>
+              {routes.map(({ path, component }) => (
+                <Route key={`${path}`} path={path} component={component} />
+              ))}
+            </Switch>
+          </QueryClientProvider>
         </AppStateProvider>
       </AudioContextContextProvider>
     </MantineProvider>

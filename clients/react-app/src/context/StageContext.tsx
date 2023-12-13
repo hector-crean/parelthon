@@ -1,35 +1,32 @@
-
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useState
-} from "react";
-
+import { ReactNode, createContext, useContext, useState } from "react";
 
 interface IStageContext {
   time: number;
   setTime: (time: number) => void;
+  lastRequestedTime: number;
+  setLastRequestedTime: (time: number) => void;
   duration: number;
   setDuration: (duration: number) => void;
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
   isSeeking: boolean;
   setIsSeeking: (isSeeking: boolean) => void;
-  aspectRatio: [number, number],
+  aspectRatio: [number, number];
   setAspectRatio: (aspectRatio: [number, number]) => void;
 }
 export const StageContext = createContext<IStageContext>({
   time: 0,
-  setTime: (time: number) => { },
+  setTime: (time: number) => {},
+  lastRequestedTime: 0,
+  setLastRequestedTime: (time: number) => {},
   duration: 0,
-  setDuration: (duration: number) => { },
+  setDuration: (duration: number) => {},
   isPlaying: false,
-  setIsPlaying: (isPlaying: boolean) => { },
+  setIsPlaying: (isPlaying: boolean) => {},
   isSeeking: false,
-  setIsSeeking: (isSeeking: boolean) => { },
+  setIsSeeking: (isSeeking: boolean) => {},
   aspectRatio: [16, 9],
-  setAspectRatio: (aspectRatio: [number, number]) => { }
+  setAspectRatio: (aspectRatio: [number, number]) => {},
 });
 
 interface StageProviderProps {
@@ -37,16 +34,19 @@ interface StageProviderProps {
 }
 export const StageProvider = ({ children }: StageProviderProps) => {
   const [time, setTime] = useState(0);
+  const [lastRequestedTime, setLastRequestedTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
-  const [aspectRatio, setAspectRatio] = useState<[number, number]>([16, 9])
+  const [aspectRatio, setAspectRatio] = useState<[number, number]>([16, 9]);
 
   return (
     <StageContext.Provider
       value={{
         time,
         setTime,
+        lastRequestedTime,
+        setLastRequestedTime,
         duration,
         setDuration,
         isPlaying,
@@ -54,7 +54,7 @@ export const StageProvider = ({ children }: StageProviderProps) => {
         isSeeking,
         setIsSeeking,
         aspectRatio,
-        setAspectRatio
+        setAspectRatio,
       }}
     >
       {children}

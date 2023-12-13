@@ -1,10 +1,46 @@
-"use-client";
-
 import { exitFullscreenIconPath } from "@/icons/ExitFullscreen";
 import { fullscreenIconPath } from "@/icons/Fullscreen";
 import { motion } from "framer-motion";
 import { ReactNode, useState } from "react";
 import styles from "./VideoChapter.module.css";
+
+interface VideoLayoutProps {
+  video: ReactNode;
+  sidebar: ReactNode;
+  expandingFooter: ReactNode;
+}
+
+const VideoLayout = ({ video, sidebar, expandingFooter }: VideoLayoutProps) => {
+  const [overviewExpanded, setOverviewExpanded] = useState(false);
+
+  return (
+    <div className={styles.video_chapter_page_container}>
+      <div className={styles.main_container}>
+        <div className={styles.video_player_wrapper}>
+          {video}
+          <Coverup />
+        </div>
+        <div className={styles.video_sidepanel}>{sidebar}</div>
+      </div>
+
+      <motion.div
+        className={styles.overview_wrapper}
+        data-expanded={overviewExpanded}
+        onPointerDown={() => setOverviewExpanded(!overviewExpanded)}
+        layout
+        transition={{
+          type: "spring",
+          stiffness: 700,
+          damping: 30,
+        }}
+      >
+        {expandingFooter}
+      </motion.div>
+    </div>
+  );
+};
+
+///
 
 const drawPath = {
   hidden: { pathLength: 0, opacity: 0 },
@@ -112,42 +148,6 @@ const Coverup = () => {
         </motion.div>
       </motion.div>
     </>
-  );
-};
-
-interface VideoLayoutProps {
-  video: ReactNode;
-  sidebar: ReactNode;
-  expandingFooter: ReactNode;
-}
-
-const VideoLayout = ({ video, sidebar, expandingFooter }: VideoLayoutProps) => {
-  const [overviewExpanded, setOverviewExpanded] = useState(false);
-
-  return (
-    <div className={styles.video_chapter_page_container}>
-      <div className={styles.main_container}>
-        <div className={styles.video_player_wrapper}>
-          {video}
-          <Coverup />
-        </div>
-        <div className={styles.video_sidepanel}>{sidebar}</div>
-      </div>
-
-      <motion.div
-        className={styles.overview_wrapper}
-        data-expanded={overviewExpanded}
-        onPointerDown={() => setOverviewExpanded(!overviewExpanded)}
-        layout
-        transition={{
-          type: "spring",
-          stiffness: 700,
-          damping: 30,
-        }}
-      >
-        {expandingFooter}
-      </motion.div>
-    </div>
   );
 };
 

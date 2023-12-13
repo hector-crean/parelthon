@@ -25,12 +25,12 @@ export enum VideoPlayerMode {
 }
 
 type LayeredVideoPlayerProps = {
-  videoId: string,
+  videoId: string;
   videoPayload: IVideo;
   changeVideo: (videoId: string) => void;
   nextVideo: IVideo;
   prevVideo: IVideo;
-  videoSections: Array<VideoSection>
+  videoSections: Array<VideoSection>;
 };
 
 const LayeredVideoPlayer = ({
@@ -38,20 +38,23 @@ const LayeredVideoPlayer = ({
   videoPayload,
   changeVideo,
   nextVideo,
-  videoSections
+  videoSections,
 }: LayeredVideoPlayerProps) => {
-  //refs
-
-  const soundtrack = useMemo(() => videoSections.flatMap(section => section.audioItems), [videoSections])
-  const videoComments = useMemo(() => videoSections.flatMap(section => section.labels), [videoSections])
-
   const { appState, setAppState } = useAppContext();
-
   const {
     aspectRatio: [aw, ah],
     isPlaying,
     time,
   } = useStageContext();
+
+  const soundtrack = useMemo(
+    () => videoSections.flatMap((section) => section.audioItems),
+    [videoSections]
+  );
+  const videoComments = useMemo(
+    () => videoSections.flatMap((section) => section.labels),
+    [videoSections]
+  );
 
   //state
   const [comments, setComments] = useState<Array<VideoComment>>(videoComments);
@@ -130,8 +133,8 @@ const LayeredVideoPlayer = ({
                       <ToolsBar
                         editState={appState as EditState}
                         setEditState={setAppState}
-                        undo={() => { }}
-                        redo={() => { }}
+                        undo={() => {}}
+                        redo={() => {}}
                         canUndo={true}
                         canRedo={true}
                       />

@@ -8,7 +8,6 @@ enum FftDomain {
   TimeDomain = "time",
 }
 
-
 interface OwnProps {
   node: AnalyserNode;
   paused: boolean;
@@ -16,9 +15,16 @@ interface OwnProps {
   fillColor: string;
 }
 
-type Props = OwnProps & React.ComponentProps<"canvas">;
+type Props = OwnProps & {
+  canvasProps?: React.ComponentProps<"canvas">;
+  containerProps?: React.ComponentProps<"div">;
+};
 
-function drawTimeDomainData(context: CanvasRenderingContext2D, data: Uint8Array, strokeColor: string) {
+function drawTimeDomainData(
+  context: CanvasRenderingContext2D,
+  data: Uint8Array,
+  strokeColor: string
+) {
   let x = 0;
   const height = context.canvas.height;
   const width = context.canvas.width;
@@ -27,7 +33,7 @@ function drawTimeDomainData(context: CanvasRenderingContext2D, data: Uint8Array,
 
   // context.fillStyle = "#001400";
   // context.fillRect(0, 0, width, 256);
-  context.clearRect(0, 0, width, height)
+  context.clearRect(0, 0, width, height);
 
   context.lineWidth = 2;
   context.strokeStyle = strokeColor;
@@ -41,7 +47,11 @@ function drawTimeDomainData(context: CanvasRenderingContext2D, data: Uint8Array,
   context.stroke();
 }
 
-function drawFrequencyData(context: CanvasRenderingContext2D, data: Uint8Array, fillColor: string) {
+function drawFrequencyData(
+  context: CanvasRenderingContext2D,
+  data: Uint8Array,
+  fillColor: string
+) {
   let x = 0;
   const height = context.canvas.height;
   const width = context.canvas.width;
@@ -52,7 +62,6 @@ function drawFrequencyData(context: CanvasRenderingContext2D, data: Uint8Array, 
   // context.fillRect(0, 0, width, height);
   context.clearRect(0, 0, width, height);
 
-
   context.fillStyle = fillColor;
   for (let i = 0; i < bufferLength; i++) {
     const barHeight = height * (data[i] / 255.0);
@@ -62,7 +71,14 @@ function drawFrequencyData(context: CanvasRenderingContext2D, data: Uint8Array, 
   }
 }
 
-function renderVisualiser({ node, paused, type, fillColor, ...canvasProps }: Props) {
+function renderVisualiser({
+  node,
+  paused,
+  type,
+  fillColor,
+  canvasProps,
+  containerProps,
+}: Props) {
   const audioData = useRef(new Uint8Array(node.frequencyBinCount));
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -108,19 +124,26 @@ function renderVisualiser({ node, paused, type, fillColor, ...canvasProps }: Pro
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        width: '100%',
-        height: '100%'
+        width: "100%",
+        height: "100%",
       }}
+      {...containerProps}
     >
-      {({ width, height }) => (<canvas ref={canvasRef} style={{ display: "block", width: `${width}px`, height: `${height}px` }} {...canvasProps} />
+      {({ width, height }) => (
+        <canvas
+          ref={canvasRef}
+          style={{
+            display: "block",
+            width: `${width}px`,
+            height: `${height}px`,
+          }}
+          {...canvasProps}
+        />
       )}
     </ResizeContainer>
-
-
   );
 }
 
 const Visualiser = React.memo(renderVisualiser);
 
 export { FftDomain, Visualiser };
-

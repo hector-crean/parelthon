@@ -1,2 +1,22 @@
-.container {
+.audiotrack_container {
+  width: 100%;
+  height: 100%;
+  container-type: inline-size;
+  container-name: audiotrack_container;
+
+  background-color: green;
+
+  /* border-right: 1px dashed black; */
+
+  .relative_container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .audiotrack_label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+  }
 }
