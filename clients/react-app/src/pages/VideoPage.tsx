@@ -119,23 +119,21 @@ const VideoPage = () => {
                         onScroll={(progress) => {
                           store.setIsPlaying(true);
                           const timeThrough = progress * store.duration;
-                          const vsections = videoSections.flatMap(
-                            (s) => s.audioItems
-                          );
+                          // const vsections = videoSections.flatMap(
+                          //   (s) => s.audioItems
+                          // );
 
-                          const sorted = [...vsections].sort((a, b) =>
-                            Math.abs(timeThrough - a.iv.start) >
-                            Math.abs(timeThrough - b.iv.start)
-                              ? -1
-                              : Math.abs(timeThrough - a.iv.start) <
-                                Math.abs(timeThrough - b.iv.start)
-                              ? 1
-                              : 0
-                          );
+                          // const sorted = [...vsections].sort((a, b) =>
+                          //   Math.abs(timeThrough - a.iv.start) >
+                          //   Math.abs(timeThrough - b.iv.start)
+                          //     ? -1
+                          //     : Math.abs(timeThrough - a.iv.start) <
+                          //       Math.abs(timeThrough - b.iv.start)
+                          //     ? 1
+                          //     : 0
+                          // );
 
-                          console.log(sorted);
-
-                          store.setTime(sorted[0].iv.start);
+                          store.setTime(timeThrough);
                           store.setTimeIsSynced(false);
                         }}
                         progress={store.time / store.duration}

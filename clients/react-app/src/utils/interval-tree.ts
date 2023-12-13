@@ -4,7 +4,7 @@
 // Both insertion and deletion require O(log n) time. Searching requires O(k*logn) time, where `k`
 // is the number of intervals in the output list.
 
-import isSame = require('shallowequal')
+import isSame from 'shallowequal'
 
 export interface Interval<N extends number | bigint = number> {
     readonly low: N
