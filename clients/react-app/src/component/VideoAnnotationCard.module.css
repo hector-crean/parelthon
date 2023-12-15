@@ -1,0 +1,74 @@
+.thread {
+    container-type: inline-size;
+    container-name: card_container;
+
+    @container card_container (max-width: $mantine-breakpoint-md) {}
+
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: [thread-col-start] 0px [gutter-start] 10px [gutter-end] 1fr [inner-start] min(60ch, calc(100% - 64px)) [inner-end] 1fr 0px [thread-col-end];
+    grid-template-rows: [thread-row-start] repeat(auto-fill, 100px) [thread-row-end];
+
+    gap: 4px;
+
+
+    [data-fullbleed='true'] {
+      width: 100%;
+      grid-column: thread-col-start / thread-col-end;
+    }
+
+  
+
+    [data-central='true'] {
+      width: 100%;
+      grid-column: 4 / -1;
+    }
+
+    [data-gutter='true']{
+      grid-column: 2;
+      border-left: 2px dashed black ;
+
+    }
+}
+
+
+
+  
+  .card { 
+    display: grid;
+    grid-template-columns: [card-col-start] 0 min-content 1fr 0 [card-col-end];
+    grid-template-rows: [card-row-start] 0  min-content 1fr 0px [card-row-end];
+    grid-template-areas:
+      ". gutter . ."
+      ". gutter card_header ."
+      ". gutter card_main  ."
+      ". gutter . .";
+      border-radius: 4px;
+      background: #000;
+      color: white;
+
+    /* .card_gutter {
+      grid-area: gutter;
+      border-left: 2px solid red;
+      background-color: transparent;
+
+    } */
+
+
+
+    .card_header {
+        grid-area: card_header;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        
+
+        
+    }
+    .card_main {
+        grid-area: card_main;
+    }
+  }
+  

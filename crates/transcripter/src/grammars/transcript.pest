@@ -1,0 +1,11 @@
+WHITESPACE = _{ " " | "\t" }
+newline = _{ "\n" | "\r\n" }
+digit = { '0'..'9' }
+hours = { digit{2} }
+minutes = { digit{2} }
+seconds = { digit{2} }
+timestamp = { "[" ~ hours ~ ":" ~ minutes ~ ":" ~ seconds ~ "]" }
+text = { (!newline ~ ANY)* }
+
+line = { timestamp ~ text }
+transcript = { SOI ~ (line ~ newline)* ~ line? ~ EOI }

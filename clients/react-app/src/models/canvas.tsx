@@ -1,31 +1,13 @@
 
 
 import { Feature, Geometry, Point } from 'geojson';
-import { Interval } from './interval';
 
 
-type RichText = string;
 
-type Block = { type: 'paragraph', text: RichText } | { type: 'header-1', text: RichText } | { type: 'img', url: 'string' }
 
-interface Layer {
-    //unique identifier for this layer
-    id: string;
-    //interval of time in video over which this layer is visible
-    //We could technically have a datetime interval etc. as well
-    interval: Interval
-    //This is the geometry with metadata used to style it. We're using
-    //geojson as it can be easily stored in a database, and is a ubiquitous
-    //format
-    feature: Feature<Geometry, FeatureMetadata>,
-    //content
-    title: RichText,
-    subtitle: RichText,
-    body: Array<Block>
-    //Information about creation of the Layer (when/by whom)
-    updatedAt: Date,
-    updatedBy: string,
-}
+
+
+
 
 
 enum Z {
@@ -59,9 +41,12 @@ type FeatureMetadata = {
 type FeatureType<T extends Feature<Geometry, FeatureMetadata>['geometry']['type']> = T
 
 
+
+
 const render = (feature: Feature<Geometry, FeatureMetadata>) => {
     switch (feature.geometry.type) {
         case 'LineString':
+        case 'Point':
     }
 }
 
@@ -176,6 +161,6 @@ type Color = {
 
 
 
-export type { FeatureType, EditState, XYWH, Style, ViewState, AppState };
 export { EditMode, Side, ViewMode };
+export type { AppState, EditState, FeatureType, Style, ViewState, XYWH };
 

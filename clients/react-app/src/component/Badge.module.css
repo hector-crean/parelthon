@@ -1,0 +1,29 @@
+.box_wrapper {
+    container:  box_wrapper / inline-size;
+    width: 100%;
+    height: 100%;
+}
+
+@container (min-width: 0px) {
+    .box {
+        width: cqmin;
+        height: cqmin;
+        aspect-ratio: 1;
+        background: green;
+
+        display: grid;
+        justify-items: center;
+        align-items: center;
+        
+
+        .hero_img {
+            width: 90%;
+            heigh: 90%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 100%;
+        }
+      }
+  }
+
+  

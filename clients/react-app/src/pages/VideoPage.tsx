@@ -1,12 +1,11 @@
 import { getVideoWithCommentsByVideoId } from "@/api/comments";
 import { AudioTrack } from "@/component/AudioTrack";
-import { CommentThread } from "@/component/CommentThread";
 import { LayeredVideoPlayer } from "@/component/LayeredVideoPlayer";
 import { QueryResult } from "@/component/QueryResult";
 import { ScrollTimeline } from "@/component/ScrollTimeline";
+import { VideoAnnotationCard } from "@/component/VideoAnnotationCard";
 import { Tabs } from "@/component/tabs/Tabs";
 import { videoSections } from "@/data/video-sections";
-import { PauseIcon } from "@/icons/Pause";
 import { PlayIcon } from "@/icons/Play";
 import { VideoLayout } from "@/layouts/VideoLayout";
 import { RoutePath } from "@/routes";
@@ -85,19 +84,16 @@ const VideoPage = () => {
               <Tabs
                 initialTabs={[
                   {
-                    id: "tab-2",
-                    label: "Tab 2",
-                    icon: <PauseIcon />,
+                    id: 'annotations',
+                    label: 'Annotations',
+                    icon: <PlayIcon />,
                     tabBody: (
-                      <CommentThread
-                        comments={comments}
-                        timeActiveCommentIds={[]}
-                        selectedCommentId={""}
-                      />
-                    ),
+                      <VideoAnnotationCard />
+                    )
+
                   },
                   {
-                    id: "tab-3",
+                    id: "timeline",
                     label: "Timeline",
                     icon: <PlayIcon />,
                     tabBody: (

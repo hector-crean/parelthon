@@ -15,11 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import styles from "./Label.module.css";
 
-const labelVariant = {
-  badge: {},
-  compact: {},
-  full: {},
-};
+
 
 export type Quadrant = `${"top" | "bottom"}-${"left" | "right"}`;
 type Interval = { start: number; end: number };
@@ -100,7 +96,7 @@ export const Label = ({ comment, arrowLayout, appState }: LabelProps) => {
 
   const [isActive, setIsActive] = useState(false);
 
-  const content = "Label Content";
+  const INITIAL_CONTENT = "Label Content";
 
   const editor = useEditor({
     extensions: [
@@ -112,7 +108,7 @@ export const Label = ({ comment, arrowLayout, appState }: LabelProps) => {
       Highlight,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
-    content,
+    content: INITIAL_CONTENT,
   });
 
   return (
