@@ -105,6 +105,7 @@ const VideoPage = () => {
                               <AudioTrack
                                 key={`item-${i}`}
                                 track={audioItem}
+                                color='red'
                                 muted={true}
                                 style={{ width: "100%", height: "200px" }}
                                 visualiserVisible={true}
