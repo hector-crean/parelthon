@@ -1,0 +1,47 @@
+.scroll_container {
+    width: 100%;
+    overflow-x: scroll;
+    height: 200px;
+    background: linear-gradient(180deg, rgb(44, 44, 44) 0%, rgb(40, 36, 36) 100%);
+    padding: 0;
+    margin: 0;
+
+    
+    .scroll_child {
+        width: min-content;
+        height: 100%;
+    }
+}
+
+
+.drag_area {
+    position: relative;
+    /* width: 500vh; */
+    height: 100%;
+}
+
+.drag_handle {
+    position: absolute;
+   top: 0;
+   left: 0;
+   height: 100%;
+   width: 4px;
+   background-color: red;
+   z-index: 2;
+}
+
+.drag_handle_proxy {
+    position: absolute;
+   top: 0;
+   left: 0;
+   height: 100%;
+   width: 4px;
+   /* transform: translateX(-50%); */
+   z-index: 1;
+}
+
+.time_marker {
+    position: absolute;
+    top: 0;
+    height: 10px;
+}
