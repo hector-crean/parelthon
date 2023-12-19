@@ -20,16 +20,21 @@ interface AudioTrackProps extends ComponentProps<typeof motion.div> {
   muted: boolean;
   track: VideoAudioItem;
   visualiserVisible: boolean;
+  color: string;
 }
 
 export const AudioTrack = ({
   muted,
   track: { iv, src, id },
   visualiserVisible,
+  style,
+  color,
   ...props
 }: AudioTrackProps) => {
   const store = useVideoStageStore();
   const audioContext = useAudioContextContext();
+
+  const [duration, setDuration] = useState(0)
 
   const [audioIsPlaying, setAudioIsPlaying] = useState(false);
   const [audioBuf, setAudioBuf] = useState<sac.AudioBuffer | null>(null);
@@ -69,6 +74,8 @@ export const AudioTrack = ({
         const decodedAudio = await audioContext.decodeAudioData(arrayBuffer);
         if (!isCancelled) {
           setAudioBuf(decodedAudio);
+          setDuration(decodedAudio.duration);
+
         }
         const bufferSourceNode = audioContext.createBufferSource();
         bufferSourceNodeRef.current?.disconnect();
@@ -178,10 +185,17 @@ export const AudioTrack = ({
         store.setTimeIsSynced(false);
       }}
       whileHover={{
-        backgroundColor: "red",
+        backgroundColor: "grey",
+        color: 'white',
         transition: { duration: 1 },
       }}
       whileTap={{ backgroundColor: "red" }}
+      style={{
+        borderRight: `2px solid ${color}`,
+        borderLeft: `2px solid ${color}`,
+        margin: '0 2px 0 2px',
+        ...style
+      }}
       {...props}
     >
       <div className={styles.relative_container}>
